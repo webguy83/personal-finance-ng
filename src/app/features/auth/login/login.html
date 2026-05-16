@@ -1,0 +1,107 @@
+<div class="bg-white rounded-2xl p-8 md:p-10 shadow-sm w-full">
+  <h1 class="text-preset-1 text-grey-900 mb-8">Login</h1>
+
+  <form (submit)="submit($event)" novalidate>
+
+    <!-- Server error -->
+    @if (serverError()) {
+      <div
+        role="alert"
+        class="mb-6 rounded-lg bg-red/10 border border-red px-4 py-3 text-preset-4 text-red"
+      >
+        {{ serverError() }}
+      </div>
+    }
+
+    <!-- Email -->
+    <div class="mb-4">
+      <label for="email" class="block text-preset-5-bold text-grey-500 mb-1">Email</label>
+      @let emailField = loginForm.email();
+      @let showEmailError = (submitted() || emailField.touched()) && emailField.errors().length > 0;
+      <input
+        id="email"
+        type="email"
+        autocomplete="email"
+        [formField]="loginForm.email"
+        [attr.aria-invalid]="showEmailError"
+        [attr.aria-describedby]="showEmailError ? 'email-error' : null"
+        class="w-full rounded-lg border px-4 py-3 text-preset-4 text-grey-900 outline-none transition
+               focus:border-grey-900 focus:ring-1 focus:ring-grey-900"
+        [class.border-grey-300]="!showEmailError"
+        [class.border-red]="showEmailError"
+      />
+      @if (showEmailError) {
+        <p id="email-error" class="mt-1 text-preset-5 text-red" role="alert">
+          {{ emailField.errors()[0].message }}
+        </p>
+      }
+    </div>
+
+    <!-- Password -->
+    <div class="mb-6">
+      <label for="password" class="block text-preset-5-bold text-grey-500 mb-1">Password</label>
+      @let passwordField = loginForm.password();
+      @let showPasswordError = (submitted() || passwordField.touched()) && passwordField.errors().length > 0;
+      <div class="relative">
+        <input
+          id="password"
+          [type]="showPassword() ? 'text' : 'password'"
+          autocomplete="current-password"
+          [formField]="loginForm.password"
+          [attr.aria-invalid]="showPasswordError"
+          [attr.aria-describedby]="showPasswordError ? 'password-error' : null"
+          class="w-full rounded-lg border px-4 py-3 pr-12 text-preset-4 text-grey-900 outline-none transition
+                 focus:border-grey-900 focus:ring-1 focus:ring-grey-900"
+          [class.border-grey-300]="!showPasswordError"
+          [class.border-red]="showPasswordError"
+        />
+        <button
+          type="button"
+          (click)="togglePassword()"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          class="absolute right-4 top-1/2 -translate-y-1/2 text-grey-500 hover:text-grey-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-grey-900 rounded"
+        >
+          @if (showPassword()) {
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          }
+        </button>
+      </div>
+      @if (showPasswordError) {
+        <p id="password-error" class="mt-1 text-preset-5 text-red" role="alert">
+          {{ passwordField.errors()[0].message }}
+        </p>
+      }
+    </div>
+
+    <!-- Submit -->
+    <button
+      type="submit"
+      [disabled]="isSubmitting()"
+      class="w-full rounded-lg bg-grey-900 px-4 py-4 text-preset-4-bold text-white transition
+             hover:bg-grey-500 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-grey-900
+             disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      @if (isSubmitting()) { Logging in... } @else { Login }
+    </button>
+
+  </form>
+
+  <p class="mt-8 text-center text-preset-4 text-grey-500">
+    Need to create an account?
+    <a routerLink="/auth/signup" class="text-preset-4-bold text-grey-900 underline hover:text-beige-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grey-900 rounded">
+      Sign Up
+    </a>
+  </p>
+</div>
+

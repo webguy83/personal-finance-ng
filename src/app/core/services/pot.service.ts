@@ -1,0 +1,86 @@
+import { Injectable, inject, signal } from '@angular/core';
+import { LoadingService } from './loading.service';
+import {
+  Firestore,
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  DocumentData,
+  QuerySnapshot,
+  increment,
+} from 'firebase/firestore';
+import { Auth, onAuthStateChanged } from 'firebase/auth';
+import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../firebase';
+import { Pot, NewPot } from '../models/pot.model';
+import { UserService } from './user.service';
+
+@Injectable({ providedIn: 'root' })
+export class PotService {
+  private readonly auth = inject<Auth>(FIREBASE_AUTH);
+  private readonly firestore = inject<Firestore>(FIREBASE_FIRESTORE);
+  private readonly userService = inject(UserService);
+
+  private readonly loadingService = inject(LoadingService);
+
+  private readonly _pots = signal<Pot[]>([]);
+  private readonly _loading = signal(true);
+
+  readonly pots = this._pots.asReadonly();
+  readonly loading = this._loading.asReadonly();
+
+  constructor() {
+    onAuthStateChanged(this.auth, (user) => {
+      if (user) {
+        this.listenToPots(user.uid);
+      } else {
+        this._pots.set([]);
+        this._loading.set(false);
+      }
+    });
+  }
+
+  private listenToPots(uid: string): void {
+    this.loadingService.add();
+    let firstLoad = true;
+    const ref = collection(this.firestore, 'users', uid, 'pots');
+    const q = query(ref, orderBy('name'));
+    onSnapshot(q, (snapshot: QuerySnapshot<DocumentData>) => {
+      const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as Pot);
+      this._pots.set(items);
+      this._loading.set(false);
+      if (firstLoad) { firstLoad = false; this.loadingService.remove(); }
+    });
+  }
+
+  async add(uid: string, pot: NewPot): Promise<void> {
+    const ref = collection(this.firestore, 'users', uid, 'pots');
+    await addDoc(ref, pot);
+  }
+
+  async update(uid: string, id: string, changes: Partial<NewPot>): Promise<void> {
+    const ref = doc(this.firestore, 'users', uid, 'pots', id);
+    await updateDoc(ref, changes as DocumentData);
+  }
+
+  /** Add or withdraw money from a pot; mirrors the delta on the user's balance */
+  async adjustTotal(uid: string, id: string, amount: number): Promise<void> {
+    const ref = doc(this.firestore, 'users', uid, 'pots', id);
+    await updateDoc(ref, { total: increment(amount) });
+    // Adding to pot deducts from balance; withdrawing adds to balance
+    await this.userService.adjustBalance(uid, -amount);
+  }
+
+  /** Delete a pot and return its saved total to the user's balance */
+  async remove(uid: string, id: string, potTotal: number): Promise<void> {
+    const ref = doc(this.firestore, 'users', uid, 'pots', id);
+    await deleteDoc(ref);
+    if (potTotal > 0) {
+      await this.userService.adjustBalance(uid, potTotal);
+    }
+  }
+}

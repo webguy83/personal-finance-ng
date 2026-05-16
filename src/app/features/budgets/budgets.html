@@ -1,0 +1,357 @@
+<!-- Page wrapper -->
+<div class="flex flex-col gap-8">
+
+  <!-- ── Header ──────────────────────────────────────────── -->
+  <div class="flex items-center justify-between">
+    <h1 class="text-preset-1 text-grey-900">Budgets</h1>
+    <button
+      type="button"
+      (click)="openAddModal()"
+      class="flex items-center gap-2 bg-grey-900 text-white rounded-lg px-4 py-3 text-preset-4-bold hover:bg-grey-500 transition-colors duration-200 cursor-pointer"
+    >
+      <span aria-hidden="true" class="text-base leading-none">+</span>
+      <span class="hidden sm:inline">Add New Budget</span>
+    </button>
+  </div>
+
+  <!-- ── Loading ─────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="bg-white rounded-xl p-8 flex justify-center items-center min-h-48">
+      <p class="text-preset-4 text-grey-500">Loading budgets…</p>
+    </div>
+  } @else if (enrichedBudgets().length === 0) {
+
+    <!-- ── Empty state ──────────────────────────────────── -->
+    <div class="bg-white rounded-xl p-8 flex flex-col items-center gap-4 text-center justify-center min-h-48">
+      <p class="text-preset-3 text-grey-900">No budgets yet</p>
+      <p class="text-preset-4 text-grey-500">Add your first budget to start tracking your spending.</p>
+      <button
+        type="button"
+        (click)="openAddModal()"
+        class="text-preset-4-bold text-green hover:underline cursor-pointer"
+      >
+        Add Budget
+      </button>
+    </div>
+
+  } @else {
+
+    <!-- ── Main grid ────────────────────────────────────── -->
+    <div class="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-6 items-start">
+
+      <!-- ── Left: Spending Summary ──────────────────────── -->
+      <div class="bg-white rounded-xl p-6 lg:p-8">
+
+        <app-donut-chart
+          [segments]="donutSegments()"
+          [centerLabel]="(totalSpent() | currency:'USD':'symbol':'1.0-2') ?? ''"
+          [centerSub]="'of ' + ((totalBudget() | currency:'USD':'symbol':'1.0-2') ?? '') + ' limit'"
+          legendTitle="Spending Summary"
+          [legendItems]="donutLegendItems()"
+        />
+      </div>
+
+      <!-- ── Right: Budget cards ──────────────────────────── -->
+      <div class="flex flex-col gap-6">
+        @for (budget of enrichedBudgets(); track budget.id) {
+          <div class="bg-white rounded-xl p-6 lg:p-8">
+
+            <!-- Card header -->
+            <div class="flex items-center justify-between mb-5">
+              <div class="flex items-center gap-4">
+                <div class="w-4 h-4 rounded-full shrink-0" [style.background-color]="budget.theme"></div>
+                <h2 class="text-preset-2 text-grey-900">{{ budget.category }}</h2>
+              </div>
+
+              <!-- Three-dot menu -->
+              <div class="relative">
+                <button
+                  type="button"
+                  (click)="toggleMenu(budget.id, $event)"
+                  class="p-1 hover:opacity-60 transition-opacity cursor-pointer"
+                  [attr.aria-label]="'Options for ' + budget.category + ' budget'"
+                  title="Budget options"
+                  aria-haspopup="true"
+                  [attr.aria-expanded]="openMenuId() === budget.id"
+                >
+                  <img src="/icon-ellipsis.svg" alt="" width="16" height="4" aria-hidden="true" />
+                </button>
+
+                @if (openMenuId() === budget.id) {
+                  <div
+                    class="absolute right-0 top-8 bg-white rounded-xl shadow-lg border border-grey-100 py-3 z-20 min-w-[160px]"
+                    (click)="$event.stopPropagation()"
+                    role="menu"
+                  >
+                    <button
+                      type="button"
+                      role="menuitem"
+                      (click)="openEditModal(budget)"
+                      class="w-full text-left px-5 py-2 text-preset-4 text-grey-900 hover:bg-grey-100 transition-colors cursor-pointer"
+                    >
+                      Edit Budget
+                    </button>
+                    <div class="h-px bg-grey-100 mx-5 my-1" role="separator"></div>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      (click)="openDeleteConfirm(budget)"
+                      class="w-full text-left px-5 py-2 text-preset-4 text-red hover:bg-grey-100 transition-colors cursor-pointer"
+                    >
+                      Delete Budget
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Maximum label -->
+            <p class="text-preset-4 text-grey-500 mb-4">Maximum of {{ budget.maximum | currency:'USD':'symbol':'1.0-2' }}</p>
+
+            <!-- Progress bar -->
+            <div
+              class="h-8 bg-beige-100 rounded-lg p-1 mb-3"
+              role="progressbar"
+              [attr.aria-valuenow]="budget.progressPct"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="budget.category + ' budget progress'"
+              title="Budget progress"
+            >
+              <div
+                class="h-full rounded transition-[width] duration-300"
+                [style.background-color]="budget.theme"
+                [style.width.%]="budget.progressPct"
+              ></div>
+            </div>
+
+            <!-- Spent / Remaining stats -->
+            <div class="flex gap-4 mb-6">
+              <div class="flex-1 pl-4 border-l-4" [style.border-color]="budget.theme">
+                <p class="text-preset-5 text-grey-500">Spent</p>
+                <p class="text-preset-4-bold text-grey-900">{{ budget.spent | currency:'USD':'symbol':'1.0-2' }}</p>
+              </div>
+              <div class="flex-1 pl-4 border-l border-grey-100">
+                <p class="text-preset-5 text-grey-500">Remaining</p>
+                <p class="text-preset-4-bold text-grey-900">{{ budget.remaining | currency:'USD':'symbol':'1.0-2' }}</p>
+              </div>
+            </div>
+
+            <!-- Latest spending -->
+            <div class="bg-beige-100 rounded-xl p-4 sm:p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-preset-3 text-grey-900">Latest Spending</h3>
+                <a
+                  routerLink="/transactions"
+                  class="flex items-center gap-2 text-preset-4 text-grey-500 hover:text-grey-900 transition-colors"
+                >
+                  See All
+                  <span class="block w-2 h-2 bg-grey-500 icon-mask icon-caret-right" aria-hidden="true"></span>
+                </a>
+              </div>
+
+              @if (budget.recent.length === 0) {
+                <p class="text-preset-5 text-grey-500 py-2 text-center">No spending recorded yet.</p>
+              } @else {
+                <div>
+                  @for (tx of budget.recent; track tx.id; let last = $last) {
+                    <div
+                      class="flex items-center gap-3 py-3"
+                      [class.border-b]="!last"
+                      [class.border-grey-300]="!last"
+                    >
+                      <app-avatar [name]="tx.name" />
+                      <p class="flex-1 min-w-0 text-preset-5-bold text-grey-900 truncate">{{ tx.name }}</p>
+                      <div class="text-right shrink-0">
+                        <p class="text-preset-5-bold text-grey-900">{{ tx.amount | currency:'USD':'symbol':'1.0-2' }}</p>
+                        <p class="text-preset-5 text-grey-500">{{ tx.date.toDate() | date:'dd MMM yyyy' }}</p>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+      <!-- /Right: Budget cards -->
+
+    </div>
+    <!-- /Main grid -->
+
+  }
+</div>
+<!-- /Page wrapper -->
+
+
+<!-- ── Add / Edit Budget Modal ─────────────────────────── -->
+@if (showModal()) {
+  <div
+    class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="editingBudget() ? 'edit-budget-title' : 'add-budget-title'"
+    (click)="closeModal()"
+    (keydown.escape)="closeModal()"
+  >
+    <div
+      class="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-[560px] max-h-[85dvh] overflow-y-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="flex items-start justify-between mb-2">
+        <h2
+          [id]="editingBudget() ? 'edit-budget-title' : 'add-budget-title'"
+          class="text-preset-2 sm:text-preset-1 text-grey-900"
+        >
+          {{ editingBudget() ? 'Edit Budget' : 'Add New Budget' }}
+        </h2>
+        <button
+          type="button"
+          (click)="closeModal()"
+          aria-label="Close modal"
+          class="p-1 hover:opacity-70 transition-opacity cursor-pointer shrink-0 ml-4 mt-1"
+        >
+          <img src="/icon-close-modal.svg" alt="" width="24" height="24" aria-hidden="true" />
+        </button>
+      </div>
+
+      <p class="text-preset-4 text-grey-500 mb-5">
+        @if (editingBudget()) {
+          Update the spending limit or color theme for this budget.
+        } @else {
+          Choose a category to set a spending cap. These categories can help you monitor spending.
+        }
+      </p>
+
+      <!-- Form -->
+      <form (submit)="onSubmit($event)" novalidate class="flex flex-col gap-4">
+
+        <!-- Category -->
+        <div class="flex flex-col gap-1">
+          <label class="text-preset-5-bold text-grey-500">Budget Category</label>
+          <div class="relative">
+            <app-dropdown
+              class="!block w-full"
+              [options]="modalCategoryOptions()"
+              [value]="formCategory()"
+              (valueChange)="onCategoryChange($event)"
+            />
+          </div>
+        </div>
+
+        <!-- Maximum -->
+        <div class="flex flex-col gap-1">
+          <label for="budget-maximum" class="text-preset-5-bold text-grey-500">Maximum Spending</label>
+          <div class="relative">
+            <span
+              class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-preset-4 text-beige-500"
+              aria-hidden="true"
+            >$</span>
+            <input
+              id="budget-maximum"
+              [formField]="budgetForm.maximum"
+              type="number"
+              step="0.01"
+              placeholder="e.g. 200"
+              class="w-full border rounded-lg pl-8 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
+              [class.border-beige-500]="!(budgetForm.maximum().touched() && budgetForm.maximum().invalid())"
+              [class.border-red]="budgetForm.maximum().touched() && budgetForm.maximum().invalid()"
+            />
+          </div>
+          @if (budgetForm.maximum().touched() && budgetForm.maximum().invalid()) {
+            <p class="text-preset-5 text-red" role="alert">
+              {{ budgetForm.maximum().errors()[0]?.message ?? 'Maximum is required' }}
+            </p>
+          }
+        </div>
+
+        <!-- Color tag -->
+        <div class="flex flex-col gap-2">
+          <span class="text-preset-5-bold text-grey-500">Color Tag</span>
+          <div class="flex flex-wrap gap-2">
+            @for (color of themeColors; track color) {
+              <button
+                type="button"
+                (click)="onThemeChange(color)"
+                class="w-8 h-8 rounded-full transition-transform cursor-pointer hover:scale-110 relative"
+                [style.background-color]="color"
+                [attr.aria-label]="'Select color ' + color"
+                [attr.aria-pressed]="formTheme() === color"
+              >
+                @if (formTheme() === color) {
+                  <span class="absolute inset-0 flex items-center justify-center">
+                    <img src="/icon-selected.svg" alt="" width="12" height="12" aria-hidden="true" />
+                  </span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (submitError()) {
+          <p class="text-preset-5 text-red" role="alert">{{ submitError() }}</p>
+        }
+
+        <button
+          type="submit"
+          class="w-full bg-grey-900 text-white rounded-lg py-4 text-preset-4-bold hover:bg-grey-500 transition-colors duration-200 cursor-pointer mt-2"
+        >
+          {{ editingBudget() ? 'Save Changes' : 'Add Budget' }}
+        </button>
+      </form>
+    </div>
+  </div>
+}
+
+
+<!-- ── Delete Confirm Modal ────────────────────────────── -->
+@if (deletingBudget()) {
+  <div
+    class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-budget-title"
+    (click)="cancelDelete()"
+    (keydown.escape)="cancelDelete()"
+  >
+    <div
+      class="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-[480px]"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-start justify-between mb-2">
+        <h2 id="delete-budget-title" class="text-preset-2 sm:text-preset-1 text-grey-900">
+          Delete '{{ deletingBudget()!.category }}'?
+        </h2>
+        <button
+          type="button"
+          (click)="cancelDelete()"
+          aria-label="Close modal"
+          class="p-1 hover:opacity-70 transition-opacity cursor-pointer shrink-0 ml-4 mt-1"
+        >
+          <img src="/icon-close-modal.svg" alt="" width="24" height="24" aria-hidden="true" />
+        </button>
+      </div>
+      <p class="text-preset-4 text-grey-500 mb-5">
+        Are you sure you want to delete this budget? This action cannot be reversed, and all the data inside it will be removed forever.
+      </p>
+      <div class="flex flex-col gap-3">
+        <button
+          type="button"
+          (click)="confirmDelete()"
+          class="w-full bg-red text-white rounded-lg py-4 text-preset-4-bold hover:opacity-80 transition-opacity cursor-pointer"
+        >
+          Yes, Confirm Deletion
+        </button>
+        <button
+          type="button"
+          (click)="cancelDelete()"
+          class="w-full bg-white text-grey-500 rounded-lg py-4 text-preset-4-bold border border-beige-500 hover:bg-grey-100 transition-colors cursor-pointer"
+        >
+          No, Go Back
+        </button>
+      </div>
+    </div>
+  </div>
+}

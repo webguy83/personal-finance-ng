@@ -1,0 +1,139 @@
+<div class="flex h-screen bg-beige-100">
+
+  <!-- Sidebar (desktop) -->
+  <div
+    class="hidden lg:flex flex-col bg-grey-900 rounded-r-2xl transition-all duration-300"
+    [class.w-[300px]]="!collapsed()"
+    [class.w-[88px]]="collapsed()"
+    [class.pr-10]="!collapsed()"
+  >
+    <!-- Logo -->
+    <div class="px-8 py-10 shrink-0" [class.px-6]="collapsed()">
+      @if (!collapsed()) {
+        <img src="/logo-large.svg" alt="finance" width="122" height="22" />
+      } @else {
+        <img src="/logo-small.svg" alt="finance" width="14" height="22" />
+      }
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 flex flex-col gap-1" aria-label="Sidebar navigation" [class.pr-3]="collapsed()">
+      @for (item of navItems; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="bg-beige-100 text-grey-900 rounded-r-xl border-l-4 border-green"
+          class="flex items-center gap-4 px-4 py-4 text-grey-300 hover:text-white rounded-r-xl transition-colors duration-200 group"
+          [class.justify-center]="collapsed()"
+          [attr.aria-label]="collapsed() ? item.label : null"
+        >
+          <span
+            [style.maskImage]="'url(/icon-nav-' + item.icon + '.svg)'"
+            class="nav-icon shrink-0 w-6 h-6 bg-grey-300 opacity-60 group-hover:opacity-100 group-hover:bg-white group-[.bg-beige-100]:opacity-100 group-[.bg-beige-100]:bg-green transition-[background-color,opacity] duration-200"
+            aria-hidden="true"
+          ></span>
+          @if (!collapsed()) {
+            <span class="text-preset-3 font-bold">{{ item.label }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <!-- Sign out -->
+    <button
+      type="button"
+      (click)="logout()"
+      class="flex items-center gap-4 px-8 py-4 text-grey-300 hover:text-white transition-colors duration-200 cursor-pointer group"
+      [class.justify-center]="collapsed()"
+      [class.px-6]="collapsed()"
+      aria-label="Sign out"
+    >
+      <span
+        [style.maskImage]="'url(/icon-logout.svg)'"
+        class="nav-icon shrink-0 w-6 h-6 bg-grey-300 group-hover:bg-white transition-[background-color] duration-200"
+        aria-hidden="true"
+      ></span>
+      @if (!collapsed()) {
+        <span class="text-preset-3 font-bold">Sign Out</span>
+      }
+    </button>
+
+    <!-- Minimize -->
+    <button
+      type="button"
+      (click)="toggleCollapse()"
+      class="flex items-center gap-4 px-8 py-8 text-grey-300 hover:text-white transition-colors duration-200 cursor-pointer group"
+      [class.justify-center]="collapsed()"
+      [class.px-6]="collapsed()"
+    >
+      <span
+        [style.maskImage]="'url(/icon-minimize-menu.svg)'"
+        class="nav-icon shrink-0 w-6 h-6 bg-grey-300 group-hover:bg-white transition-[background-color] duration-200"
+        [class.rotate-180]="collapsed()"
+        aria-hidden="true"
+      ></span>
+      @if (!collapsed()) {
+        <span class="text-preset-3 font-bold">Minimize Menu</span>
+      }
+    </button>
+  </div>
+
+  <!-- Main content -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- Mobile bottom nav -->
+    <nav
+      class="lg:hidden fixed bottom-0 inset-x-0 bg-grey-900 rounded-t-2xl flex justify-around px-3 pt-2 pb-safe z-10"
+      aria-label="Mobile navigation"
+    >
+      @for (item of navItems; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="text-grey-900 border-b-4 border-green bg-beige-100 rounded-t-lg"
+          class="flex flex-col items-center gap-1 px-3 py-2 text-grey-300 transition-colors duration-300 group hover:text-white"
+        >
+          <span
+            [style.maskImage]="'url(/icon-nav-' + item.icon + '.svg)'"
+            class="nav-icon w-6 h-6 bg-grey-300 group-hover:bg-white group-[.text-grey-900]:bg-green transition-[background-color] duration-200"
+            aria-hidden="true"
+          ></span>
+          <span class="text-preset-5 sr-only sm:not-sr-only">{{ item.label }}</span>
+        </a>
+      }
+
+      <!-- Sign out (mobile nav) -->
+      <button
+        type="button"
+        (click)="logout()"
+        class="flex flex-col items-center gap-1 px-3 py-2 text-grey-300 hover:text-white transition-colors duration-300 group cursor-pointer"
+        aria-label="Sign out"
+      >
+        <span
+          [style.maskImage]="'url(/icon-logout.svg)'"
+          class="nav-icon w-6 h-6 bg-grey-300 group-hover:bg-white transition-[background-color] duration-200"
+          aria-hidden="true"
+        ></span>
+        <span class="text-preset-5 sr-only sm:not-sr-only">Sign Out</span>
+      </button>
+    </nav>
+
+    <!-- Page content -->
+    <main class="flex-1 overflow-y-auto px-4 py-6 lg:px-10 lg:py-8 pb-24 lg:pb-8 relative">
+      <router-outlet />
+
+      <!-- Global loading overlay -->
+      @if (loadingService.isLoading()) {
+        <div
+          class="absolute inset-0 z-40 flex items-center justify-center bg-beige-100/80 backdrop-blur-sm"
+          aria-live="polite"
+          aria-label="Loading"
+        >
+          <div class="flex flex-col items-center gap-4">
+            <div class="w-12 h-12 rounded-full border-4 border-grey-100 border-t-green animate-spin"></div>
+            <p class="text-preset-5 text-grey-500">Loading…</p>
+          </div>
+        </div>
+      }
+    </main>
+
+  </div>
+</div>

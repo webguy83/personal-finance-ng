@@ -1,0 +1,39 @@
+<div class="min-h-screen flex flex-col lg:flex-row bg-beige-100 lg:p-5">
+
+  <!-- Mobile header: dark strip with small logo, hidden on lg -->
+  <header class="lg:hidden bg-grey-900 rounded-b-2xl flex justify-center py-6">
+    <a routerLink="/" aria-label="finance home">
+      <img src="/logo-large.svg" alt="" width="122" height="22" />
+    </a>
+  </header>
+
+  <!-- Left panel: visible on large screens only -->
+  <div
+    class="hidden lg:flex lg:w-[560px] lg:shrink-0 bg-grey-900 bg-[url('/illustration-authentication.svg')] bg-no-repeat bg-cover bg-center rounded-2xl flex-col justify-between p-10"
+    aria-hidden="true"
+  >
+    <!-- Logo -->
+    <a routerLink="/" aria-label="finance home">
+      <img src="/logo-large.svg" alt="" width="122" height="22" />
+    </a>
+
+    <!-- Tagline -->
+    <div>
+      <h2 class="text-preset-1 text-beige-100 mb-4">
+        Keep track of your money<br>and save for your future
+      </h2>
+      <p class="text-preset-4 text-white">
+        Personal finance app puts you in control of your spending. Track
+        transactions, set budgets, and add to savings pots easily.
+      </p>
+    </div>
+  </div>
+
+  <!-- Right panel: the active form -->
+  <main class="flex flex-1 items-center justify-center px-4 py-10">
+    <div class="w-full max-w-[560px]">
+      <router-outlet />
+    </div>
+  </main>
+
+</div>
