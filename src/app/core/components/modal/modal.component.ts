@@ -3,7 +3,18 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 @Component({
   selector: 'app-modal',
   templateUrl: './modal.component.html',
+  styleUrl: './modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    role: 'dialog',
+    'aria-modal': 'true',
+    'aria-labelledby': 'modal-heading',
+    'animate.enter': 'modal-in',
+    'animate.leave': 'modal-out',
+    '(mousedown)': 'onBackdropMousedown($event)',
+    '(click)': 'onBackdropClick()',
+    '(keydown.escape)': 'closed.emit()',
+  },
 })
 export class ModalComponent {
   readonly title = input.required<string>();

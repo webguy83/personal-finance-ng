@@ -1,0 +1,29 @@
+/* Backdrop styles on the host element */
+:host {
+  position: fixed;
+  inset: 0;
+  background-color: rgb(0 0 0 / 0.5);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+:host.modal-in {
+  animation: modal-in 300ms ease-out;
+}
+
+:host.modal-out {
+  animation: modal-out 200ms ease-in forwards;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}

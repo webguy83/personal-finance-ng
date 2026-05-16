@@ -1,36 +1,25 @@
-<!-- Backdrop -->
+<!-- Dialog panel -->
 <div
-  class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="modal-heading"
-  (mousedown)="onBackdropMousedown($event)"
-  (click)="onBackdropClick()"
-  (keydown.escape)="closed.emit()"
+  class="bg-white rounded-2xl p-6 sm:p-8 w-full max-h-[85dvh] overflow-y-auto"
+  [style.max-width]="maxWidth()"
+  (click)="$event.stopPropagation()"
 >
-  <!-- Dialog panel -->
-  <div
-    class="bg-white rounded-2xl p-6 sm:p-8 w-full max-h-[85dvh] overflow-y-auto"
-    [style.max-width]="maxWidth()"
-    (click)="$event.stopPropagation()"
-  >
-    <!-- Header -->
-    <div class="flex items-start justify-between mb-2">
-      <h2 id="modal-heading" class="text-preset-2 sm:text-preset-1 text-grey-900">{{ title() }}</h2>
-      <button
-        type="button"
-        (click)="closed.emit()"
-        aria-label="Close modal"
-        class="p-1 hover:opacity-70 transition-opacity cursor-pointer shrink-0 ml-4 mt-1"
-      >
-        <img src="/icon-close-modal.svg" alt="" width="24" height="24" aria-hidden="true" />
-      </button>
-    </div>
-
-    <!-- Optional description slot -->
-    <ng-content select="[modal-description]" />
-
-    <!-- Body content -->
-    <ng-content />
+  <!-- Header -->
+  <div class="flex items-start justify-between mb-2">
+    <h2 id="modal-heading" class="text-preset-2 sm:text-preset-1 text-grey-900">{{ title() }}</h2>
+    <button
+      type="button"
+      (click)="closed.emit()"
+      aria-label="Close modal"
+      class="p-1 hover:opacity-70 transition-opacity cursor-pointer shrink-0 ml-4 mt-1"
+    >
+      <img src="/icon-close-modal.svg" alt="" width="24" height="24" aria-hidden="true" />
+    </button>
   </div>
+
+  <!-- Optional description slot -->
+  <ng-content select="[modal-description]" />
+
+  <!-- Body content -->
+  <ng-content />
 </div>
