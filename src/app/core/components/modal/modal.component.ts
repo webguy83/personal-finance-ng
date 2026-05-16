@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, input, output, viewChild } from '@angular/core';
 
 @Component({
   selector: 'app-modal',
@@ -16,12 +16,18 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
     '(keydown.escape)': 'closed.emit()',
   },
 })
-export class ModalComponent {
+export class ModalComponent implements AfterViewInit {
+  private readonly panelRef = viewChild.required<ElementRef<HTMLElement>>('panel');
+
   readonly title = input.required<string>();
   readonly maxWidth = input<string>('560px');
   readonly closed = output<void>();
 
   private backdropMousedownOnSelf = false;
+
+  ngAfterViewInit(): void {
+    this.panelRef().nativeElement.focus();
+  }
 
   protected onBackdropMousedown(event: MouseEvent): void {
     this.backdropMousedownOnSelf = event.target === event.currentTarget;

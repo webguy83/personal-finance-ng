@@ -19,18 +19,13 @@ import { TransactionService } from '../../core/services/transaction.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Budget, NewBudget } from '../../core/models/budget.model';
 import { Transaction, TransactionCategory } from '../../core/models/transaction.model';
+import { THEME_COLORS } from '../../core/constants/theme-colors';
 
 const TRANSACTION_CATEGORIES: TransactionCategory[] = [
   'General', 'Dining Out', 'Groceries', 'Entertainment', 'Bills',
   'Personal Care', 'Transportation', 'Education', 'Lifestyle', 'Shopping',
 ];
 
-const THEME_COLORS = [
-  '#277C78', '#82C9D7', '#F2CDAC', '#626070',
-  '#C94736', '#826CB0', '#AF81BA', '#597C7C',
-  '#93674F', '#3F82B2', '#97A0AC', '#7F9161',
-  '#CAB361', '#BE6C49',
-];
 
 type EnrichedBudget = Budget & {
   spent: number;
@@ -125,7 +120,7 @@ export class BudgetsComponent {
   private readonly _formModel = signal<NewBudget>({
     category: TRANSACTION_CATEGORIES[0],
     maximum: 0,
-    theme: THEME_COLORS[0],
+    theme: THEME_COLORS[0].value,
   });
 
   protected readonly budgetForm = form(this._formModel, (s) => {
@@ -150,14 +145,19 @@ export class BudgetsComponent {
     return TRANSACTION_CATEGORIES.some((c) => !used.has(c));
   });
 
-  protected readonly availableThemeColors = computed(() => {
+  protected readonly themeColorOptions = computed((): DropdownOption[] => {
     const editing = this.editingBudget();
     const usedThemes = new Set(
       this.budgetService.budgets()
         .filter((b) => b.id !== editing?.id)
         .map((b) => b.theme),
     );
-    return THEME_COLORS.filter((c) => !usedThemes.has(c));
+    return THEME_COLORS.map((c) => ({
+      value: c.value,
+      label: c.label,
+      color: c.value,
+      ...(usedThemes.has(c.value) ? { secondaryLabel: 'Already used', disabled: true } : {}),
+    }));
   });
 
   protected onCategoryChange(value: string): void {
@@ -170,7 +170,7 @@ export class BudgetsComponent {
 
   protected openAddModal(): void {
     const firstAvailable = (this.modalCategoryOptions()[0]?.value ?? TRANSACTION_CATEGORIES[0]) as TransactionCategory;
-    const firstTheme = this.availableThemeColors()[0] ?? THEME_COLORS[0];
+    const firstTheme = this.themeColorOptions().find((o) => !o.secondaryLabel)?.value ?? THEME_COLORS[0].value;
     this._formModel.set({ category: firstAvailable, maximum: 0, theme: firstTheme });
     this.editingBudget.set(null);
     this.submitError.set('');

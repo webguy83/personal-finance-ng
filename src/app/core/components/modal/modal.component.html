@@ -1,5 +1,7 @@
 <!-- Dialog panel -->
 <div
+  #panel
+  tabindex="-1"
   class="bg-white rounded-2xl p-6 sm:p-8 w-full max-h-[85dvh] overflow-y-auto"
   [style.max-width]="maxWidth()"
   (click)="$event.stopPropagation()"

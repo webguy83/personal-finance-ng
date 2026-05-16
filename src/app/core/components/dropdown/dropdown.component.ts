@@ -13,6 +13,9 @@ import {
 export interface DropdownOption {
   value: string;
   label: string;
+  color?: string;
+  secondaryLabel?: string;
+  disabled?: boolean;
 }
 
 let _dropdownIdCounter = 0;
@@ -42,11 +45,16 @@ export class DropdownComponent {
     () => this.options().find((o) => o.value === this.value())?.label ?? '',
   );
 
+  protected readonly selectedOption = computed(
+    () => this.options().find((o) => o.value === this.value()),
+  );
+
   protected toggle(): void {
     this.isOpen.update((v) => !v);
   }
 
   protected select(value: string): void {
+    if (this.options().find((o) => o.value === value)?.disabled) return;
     this.valueChange.emit(value);
     this.isOpen.set(false);
   }

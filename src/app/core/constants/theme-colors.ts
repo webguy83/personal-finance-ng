@@ -1,0 +1,16 @@
+export const THEME_COLORS: { value: string; label: string }[] = [
+  { value: '#277C78', label: 'Green' },
+  { value: '#82C9D7', label: 'Cyan' },
+  { value: '#F2CDAC', label: 'Yellow' },
+  { value: '#626070', label: 'Navy' },
+  { value: '#C94736', label: 'Red' },
+  { value: '#826CB0', label: 'Purple' },
+  { value: '#AF81BA', label: 'Turquoise' },
+  { value: '#597C7C', label: 'Teal' },
+  { value: '#93674F', label: 'Brown' },
+  { value: '#3F82B2', label: 'Blue' },
+  { value: '#97A0AC', label: 'Silver' },
+  { value: '#7F9161', label: 'Olive' },
+  { value: '#CAB361', label: 'Gold' },
+  { value: '#BE6C49', label: 'Copper' },
+];

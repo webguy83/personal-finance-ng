@@ -243,27 +243,14 @@
         }
       </div>
 
-      <!-- Color tag -->
-      <div class="flex flex-col gap-2">
-        <span class="text-preset-5-bold text-grey-500">Color Tag</span>
-        <div class="flex flex-wrap gap-2">
-          @for (color of availableThemeColors(); track color) {
-            <button
-              type="button"
-              (click)="onThemeChange(color)"
-              class="w-8 h-8 rounded-full transition-transform cursor-pointer hover:scale-110 relative"
-              [style.background-color]="color"
-              [attr.aria-label]="'Select color ' + color"
-              [attr.aria-pressed]="formTheme() === color"
-            >
-              @if (formTheme() === color) {
-                <span class="absolute inset-0 flex items-center justify-center">
-                  <img src="/icon-selected.svg" alt="" width="12" height="12" aria-hidden="true" />
-                </span>
-              }
-            </button>
-          }
-        </div>
+      <!-- Theme -->
+      <div class="flex flex-col gap-1">
+        <label class="text-preset-5-bold text-grey-500">Theme</label>
+        <app-dropdown
+          [options]="themeColorOptions()"
+          [value]="formTheme()"
+          (valueChange)="onThemeChange($event)"
+        />
       </div>
 
       @if (submitError()) {
