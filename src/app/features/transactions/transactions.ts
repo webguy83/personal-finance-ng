@@ -11,6 +11,7 @@ import { form, FormField, submit, required, min as minValidator } from '@angular
 import { Timestamp } from 'firebase/firestore';
 import { AvatarComponent } from '../../core/components/avatar/avatar.component';
 import { DropdownComponent, DropdownOption } from '../../core/components/dropdown/dropdown.component';
+import { ModalComponent } from '../../core/components/modal/modal.component';
 import { TransactionService } from '../../core/services/transaction.service';
 import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
@@ -37,7 +38,7 @@ const PAGE_SIZE = 10;
   selector: 'app-transactions',
   templateUrl: './transactions.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AvatarComponent, FormField, DropdownComponent],
+  imports: [AvatarComponent, FormField, DropdownComponent, ModalComponent],
 })
 export class TransactionsComponent {
   private readonly txService = inject(TransactionService);

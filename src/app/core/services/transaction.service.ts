@@ -50,21 +50,24 @@ export class TransactionService {
       const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as Transaction);
       this._transactions.set(items);
       this._loading.set(false);
-      if (firstLoad) { firstLoad = false; this.loadingService.remove(); }
+      if (firstLoad) {
+        firstLoad = false;
+        this.loadingService.remove();
+      }
     });
   }
 
-  async add(uid: string, tx: NewTransaction): Promise<void> {
+  async add(uid: string, tx: NewTransaction) {
     const ref = collection(this.firestore, 'users', uid, 'transactions');
     await addDoc(ref, tx);
   }
 
-  async update(uid: string, id: string, changes: Partial<NewTransaction>): Promise<void> {
+  async update(uid: string, id: string, changes: Partial<NewTransaction>) {
     const ref = doc(this.firestore, 'users', uid, 'transactions', id);
     await updateDoc(ref, changes as DocumentData);
   }
 
-  async remove(uid: string, id: string): Promise<void> {
+  async remove(uid: string, id: string) {
     const ref = doc(this.firestore, 'users', uid, 'transactions', id);
     await deleteDoc(ref);
   }

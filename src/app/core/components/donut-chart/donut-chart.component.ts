@@ -29,7 +29,6 @@ export class DonutChartComponent {
   readonly legendTitle = input<string>('');
 
   readonly centerLabelFontSize = computed(() => {
-    console.log('Calculating length of center label:', this.centerLabel().length);
     const maxPx = 28;
     const minPx = 14;
     const maxWidth = 240;

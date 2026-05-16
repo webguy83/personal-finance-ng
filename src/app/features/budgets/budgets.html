@@ -7,7 +7,9 @@
     <button
       type="button"
       (click)="openAddModal()"
-      class="flex items-center gap-2 bg-grey-900 text-white rounded-lg px-4 py-3 text-preset-4-bold hover:bg-grey-500 transition-colors duration-200 cursor-pointer"
+      [disabled]="!hasAvailableCategories()"
+      [attr.title]="!hasAvailableCategories() ? 'All budget categories are in use' : null"
+      class="flex items-center gap-2 bg-grey-900 text-white rounded-lg px-4 py-3 text-preset-4-bold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed enabled:hover:bg-grey-500 enabled:cursor-pointer"
     >
       <span aria-hidden="true" class="text-base leading-none">+</span>
       <span class="hidden sm:inline">Add New Budget</span>
@@ -187,171 +189,123 @@
 
 <!-- ── Add / Edit Budget Modal ─────────────────────────── -->
 @if (showModal()) {
-  <div
-    class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-    role="dialog"
-    aria-modal="true"
-    [attr.aria-labelledby]="editingBudget() ? 'edit-budget-title' : 'add-budget-title'"
-    (click)="closeModal()"
-    (keydown.escape)="closeModal()"
+  <app-modal
+    [title]="editingBudget() ? 'Edit Budget' : 'Add New Budget'"
+    (closed)="closeModal()"
   >
-    <div
-      class="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-[560px] max-h-[85dvh] overflow-y-auto"
-      (click)="$event.stopPropagation()"
-    >
-      <!-- Header -->
-      <div class="flex items-start justify-between mb-2">
-        <h2
-          [id]="editingBudget() ? 'edit-budget-title' : 'add-budget-title'"
-          class="text-preset-2 sm:text-preset-1 text-grey-900"
-        >
-          {{ editingBudget() ? 'Edit Budget' : 'Add New Budget' }}
-        </h2>
-        <button
-          type="button"
-          (click)="closeModal()"
-          aria-label="Close modal"
-          class="p-1 hover:opacity-70 transition-opacity cursor-pointer shrink-0 ml-4 mt-1"
-        >
-          <img src="/icon-close-modal.svg" alt="" width="24" height="24" aria-hidden="true" />
-        </button>
+    <p modal-description class="text-preset-4 text-grey-500 mb-5">
+      @if (editingBudget()) {
+        Update the spending limit or color theme for this budget.
+      } @else {
+        Choose a category to set a spending cap. These categories can help you monitor spending.
+      }
+    </p>
+
+    <!-- Form -->
+    <form (submit)="onSubmit($event)" novalidate class="flex flex-col gap-4">
+
+      <!-- Category -->
+      <div class="flex flex-col gap-1">
+        <label class="text-preset-5-bold text-grey-500">Budget Category</label>
+        <div class="relative">
+          <app-dropdown
+            class="!block w-full"
+            [options]="modalCategoryOptions()"
+            [value]="formCategory()"
+            (valueChange)="onCategoryChange($event)"
+          />
+        </div>
       </div>
 
-      <p class="text-preset-4 text-grey-500 mb-5">
-        @if (editingBudget()) {
-          Update the spending limit or color theme for this budget.
-        } @else {
-          Choose a category to set a spending cap. These categories can help you monitor spending.
-        }
-      </p>
-
-      <!-- Form -->
-      <form (submit)="onSubmit($event)" novalidate class="flex flex-col gap-4">
-
-        <!-- Category -->
-        <div class="flex flex-col gap-1">
-          <label class="text-preset-5-bold text-grey-500">Budget Category</label>
-          <div class="relative">
-            <app-dropdown
-              class="!block w-full"
-              [options]="modalCategoryOptions()"
-              [value]="formCategory()"
-              (valueChange)="onCategoryChange($event)"
-            />
-          </div>
+      <!-- Maximum -->
+      <div class="flex flex-col gap-1">
+        <label for="budget-maximum" class="text-preset-5-bold text-grey-500">Maximum Spending</label>
+        <div class="relative">
+          <span
+            class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-preset-4 text-beige-500"
+            aria-hidden="true"
+          >$</span>
+          <input
+            id="budget-maximum"
+            [formField]="budgetForm.maximum"
+            type="number"
+            step="0.01"
+            placeholder="e.g. 200"
+            class="w-full border rounded-lg pl-8 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
+            [class.border-beige-500]="!(budgetForm.maximum().touched() && budgetForm.maximum().invalid())"
+            [class.border-red]="budgetForm.maximum().touched() && budgetForm.maximum().invalid()"
+          />
         </div>
+        @if (budgetForm.maximum().touched() && budgetForm.maximum().invalid()) {
+          <p class="text-preset-5 text-red" role="alert">
+            {{ budgetForm.maximum().errors()[0]?.message ?? 'Maximum is required' }}
+          </p>
+        }
+      </div>
 
-        <!-- Maximum -->
-        <div class="flex flex-col gap-1">
-          <label for="budget-maximum" class="text-preset-5-bold text-grey-500">Maximum Spending</label>
-          <div class="relative">
-            <span
-              class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-preset-4 text-beige-500"
-              aria-hidden="true"
-            >$</span>
-            <input
-              id="budget-maximum"
-              [formField]="budgetForm.maximum"
-              type="number"
-              step="0.01"
-              placeholder="e.g. 200"
-              class="w-full border rounded-lg pl-8 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
-              [class.border-beige-500]="!(budgetForm.maximum().touched() && budgetForm.maximum().invalid())"
-              [class.border-red]="budgetForm.maximum().touched() && budgetForm.maximum().invalid()"
-            />
-          </div>
-          @if (budgetForm.maximum().touched() && budgetForm.maximum().invalid()) {
-            <p class="text-preset-5 text-red" role="alert">
-              {{ budgetForm.maximum().errors()[0]?.message ?? 'Maximum is required' }}
-            </p>
+      <!-- Color tag -->
+      <div class="flex flex-col gap-2">
+        <span class="text-preset-5-bold text-grey-500">Color Tag</span>
+        <div class="flex flex-wrap gap-2">
+          @for (color of availableThemeColors(); track color) {
+            <button
+              type="button"
+              (click)="onThemeChange(color)"
+              class="w-8 h-8 rounded-full transition-transform cursor-pointer hover:scale-110 relative"
+              [style.background-color]="color"
+              [attr.aria-label]="'Select color ' + color"
+              [attr.aria-pressed]="formTheme() === color"
+            >
+              @if (formTheme() === color) {
+                <span class="absolute inset-0 flex items-center justify-center">
+                  <img src="/icon-selected.svg" alt="" width="12" height="12" aria-hidden="true" />
+                </span>
+              }
+            </button>
           }
         </div>
+      </div>
 
-        <!-- Color tag -->
-        <div class="flex flex-col gap-2">
-          <span class="text-preset-5-bold text-grey-500">Color Tag</span>
-          <div class="flex flex-wrap gap-2">
-            @for (color of themeColors; track color) {
-              <button
-                type="button"
-                (click)="onThemeChange(color)"
-                class="w-8 h-8 rounded-full transition-transform cursor-pointer hover:scale-110 relative"
-                [style.background-color]="color"
-                [attr.aria-label]="'Select color ' + color"
-                [attr.aria-pressed]="formTheme() === color"
-              >
-                @if (formTheme() === color) {
-                  <span class="absolute inset-0 flex items-center justify-center">
-                    <img src="/icon-selected.svg" alt="" width="12" height="12" aria-hidden="true" />
-                  </span>
-                }
-              </button>
-            }
-          </div>
-        </div>
+      @if (submitError()) {
+        <p class="text-preset-5 text-red" role="alert">{{ submitError() }}</p>
+      }
 
-        @if (submitError()) {
-          <p class="text-preset-5 text-red" role="alert">{{ submitError() }}</p>
-        }
-
-        <button
-          type="submit"
-          class="w-full bg-grey-900 text-white rounded-lg py-4 text-preset-4-bold hover:bg-grey-500 transition-colors duration-200 cursor-pointer mt-2"
-        >
-          {{ editingBudget() ? 'Save Changes' : 'Add Budget' }}
-        </button>
-      </form>
-    </div>
-  </div>
+      <button
+        type="submit"
+        class="w-full bg-grey-900 text-white rounded-lg py-4 text-preset-4-bold hover:bg-grey-500 transition-colors duration-200 cursor-pointer mt-2"
+      >
+        {{ editingBudget() ? 'Save Changes' : 'Add Budget' }}
+      </button>
+    </form>
+  </app-modal>
 }
 
 
 <!-- ── Delete Confirm Modal ────────────────────────────── -->
 @if (deletingBudget()) {
-  <div
-    class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="delete-budget-title"
-    (click)="cancelDelete()"
-    (keydown.escape)="cancelDelete()"
+  <app-modal
+    [title]="'Delete \'' + deletingBudget()!.category + '\'?'"
+    maxWidth="480px"
+    (closed)="cancelDelete()"
   >
-    <div
-      class="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-[480px]"
-      (click)="$event.stopPropagation()"
-    >
-      <div class="flex items-start justify-between mb-2">
-        <h2 id="delete-budget-title" class="text-preset-2 sm:text-preset-1 text-grey-900">
-          Delete '{{ deletingBudget()!.category }}'?
-        </h2>
-        <button
-          type="button"
-          (click)="cancelDelete()"
-          aria-label="Close modal"
-          class="p-1 hover:opacity-70 transition-opacity cursor-pointer shrink-0 ml-4 mt-1"
-        >
-          <img src="/icon-close-modal.svg" alt="" width="24" height="24" aria-hidden="true" />
-        </button>
-      </div>
-      <p class="text-preset-4 text-grey-500 mb-5">
-        Are you sure you want to delete this budget? This action cannot be reversed, and all the data inside it will be removed forever.
-      </p>
-      <div class="flex flex-col gap-3">
-        <button
-          type="button"
-          (click)="confirmDelete()"
-          class="w-full bg-red text-white rounded-lg py-4 text-preset-4-bold hover:opacity-80 transition-opacity cursor-pointer"
-        >
-          Yes, Confirm Deletion
-        </button>
-        <button
-          type="button"
-          (click)="cancelDelete()"
-          class="w-full bg-white text-grey-500 rounded-lg py-4 text-preset-4-bold border border-beige-500 hover:bg-grey-100 transition-colors cursor-pointer"
-        >
-          No, Go Back
-        </button>
-      </div>
+    <p modal-description class="text-preset-4 text-grey-500 mb-5">
+      Are you sure you want to delete this budget? This action cannot be reversed, and all the data inside it will be removed forever.
+    </p>
+    <div class="flex flex-col gap-3">
+      <button
+        type="button"
+        (click)="confirmDelete()"
+        class="w-full bg-red text-white rounded-lg py-4 text-preset-4-bold hover:opacity-80 transition-opacity cursor-pointer"
+      >
+        Yes, Confirm Deletion
+      </button>
+      <button
+        type="button"
+        (click)="cancelDelete()"
+        class="w-full bg-white text-grey-500 rounded-lg py-4 text-preset-4-bold border border-beige-500 hover:bg-grey-100 transition-colors cursor-pointer"
+      >
+        No, Go Back
+      </button>
     </div>
-  </div>
+  </app-modal>
 }

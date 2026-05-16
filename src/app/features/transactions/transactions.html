@@ -260,167 +260,142 @@
 
 <!-- ── Add Transaction Modal ──────────────────────────────── -->
 @if (showAddModal()) {
-  <div
-    class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="add-tx-title"
-    (click)="closeAddModal()"
-    (keydown.escape)="closeAddModal()"
-  >
-    <div
-      class="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-[560px] max-h-[85dvh] overflow-y-auto"
-      (click)="$event.stopPropagation()"
-    >
-      <!-- Modal header -->
-      <div class="flex items-start justify-between mb-2">
-        <h2 id="add-tx-title" class="text-preset-2 sm:text-preset-1 text-grey-900">Add New Transaction</h2>
-        <button
-          type="button"
-          (click)="closeAddModal()"
-          aria-label="Close modal"
-          class="p-1 hover:opacity-70 transition-opacity cursor-pointer shrink-0 ml-4 mt-1"
-        >
-          <img src="/icon-close-modal.svg" alt="" width="24" height="24" aria-hidden="true" />
-        </button>
+  <app-modal title="Add New Transaction" (closed)="closeAddModal()">
+    <p modal-description class="text-preset-4 text-grey-500 mb-5">
+      Track a new transaction. Choose "Expense" or "Income" to record either type.
+    </p>
+
+    <!-- Form -->
+    <form (submit)="onSubmit($event)" novalidate class="flex flex-col gap-4">
+
+      <!-- Transaction Name -->
+      <div class="flex flex-col gap-1">
+        <label for="tx-name" class="text-preset-5-bold text-grey-500">Transaction Name</label>
+        <input
+          id="tx-name"
+          [formField]="addForm.name"
+          type="text"
+          placeholder="e.g. Coffee Shop"
+          class="border rounded-lg px-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
+          [class.border-beige-500]="!(addForm.name().touched() && addForm.name().invalid())"
+          [class.border-red]="addForm.name().touched() && addForm.name().invalid()"
+        />
+        @if (addForm.name().touched() && addForm.name().invalid()) {
+          <p class="text-preset-5 text-red" role="alert">
+            {{ addForm.name().errors()[0]?.message ?? 'Transaction name is required' }}
+          </p>
+        }
       </div>
 
-      <p class="text-preset-4 text-grey-500 mb-5">
-        Track a new transaction. Choose "Expense" or "Income" to record either type.
-      </p>
+      <!-- Transaction Type (Expense / Income toggle) -->
+      <div class="flex flex-col gap-1">
+        <span class="text-preset-5-bold text-grey-500">Transaction Type</span>
+        <div class="flex rounded-lg border border-beige-500 overflow-hidden" role="group" aria-label="Transaction type">
+          <button
+            type="button"
+            (click)="setType('expense')"
+            class="flex-1 py-3 text-preset-4-bold transition-colors cursor-pointer"
+            [class.bg-grey-900]="addType() === 'expense'"
+            [class.text-white]="addType() === 'expense'"
+            [class.text-grey-500]="addType() !== 'expense'"
+            [attr.aria-pressed]="addType() === 'expense'"
+          >
+            Expense
+          </button>
+          <button
+            type="button"
+            (click)="setType('income')"
+            class="flex-1 py-3 text-preset-4-bold transition-colors cursor-pointer border-l border-beige-500"
+            [class.bg-grey-900]="addType() === 'income'"
+            [class.text-white]="addType() === 'income'"
+            [class.text-grey-500]="addType() !== 'income'"
+            [attr.aria-pressed]="addType() === 'income'"
+          >
+            Income
+          </button>
+        </div>
+      </div>
 
-      <!-- Form -->
-      <form (submit)="onSubmit($event)" novalidate class="flex flex-col gap-4">
-
-        <!-- Transaction Name -->
-        <div class="flex flex-col gap-1">
-          <label for="tx-name" class="text-preset-5-bold text-grey-500">Transaction Name</label>
+      <!-- Amount -->
+      <div class="flex flex-col gap-1">
+        <label for="tx-amount" class="text-preset-5-bold text-grey-500">Amount</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-preset-4 text-beige-500 pointer-events-none select-none">$</span>
           <input
-            id="tx-name"
-            [formField]="addForm.name"
-            type="text"
-            placeholder="e.g. Coffee Shop"
-            class="border rounded-lg px-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
-            [class.border-beige-500]="!(addForm.name().touched() && addForm.name().invalid())"
-            [class.border-red]="addForm.name().touched() && addForm.name().invalid()"
+            id="tx-amount"
+            [formField]="addForm.amount"
+            type="number"
+            placeholder="0.00"
+            step="0.01"
+            class="w-full border rounded-lg pl-7 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
+            [class.border-beige-500]="!(addForm.amount().touched() && addForm.amount().invalid())"
+            [class.border-red]="addForm.amount().touched() && addForm.amount().invalid()"
           />
-          @if (addForm.name().touched() && addForm.name().invalid()) {
-            <p class="text-preset-5 text-red" role="alert">
-              {{ addForm.name().errors()[0]?.message ?? 'Transaction name is required' }}
-            </p>
-          }
         </div>
-
-        <!-- Transaction Type (Expense / Income toggle) -->
-        <div class="flex flex-col gap-1">
-          <span class="text-preset-5-bold text-grey-500">Transaction Type</span>
-          <div class="flex rounded-lg border border-beige-500 overflow-hidden" role="group" aria-label="Transaction type">
-            <button
-              type="button"
-              (click)="setType('expense')"
-              class="flex-1 py-3 text-preset-4-bold transition-colors cursor-pointer"
-              [class.bg-grey-900]="addType() === 'expense'"
-              [class.text-white]="addType() === 'expense'"
-              [class.text-grey-500]="addType() !== 'expense'"
-              [attr.aria-pressed]="addType() === 'expense'"
-            >
-              Expense
-            </button>
-            <button
-              type="button"
-              (click)="setType('income')"
-              class="flex-1 py-3 text-preset-4-bold transition-colors cursor-pointer border-l border-beige-500"
-              [class.bg-grey-900]="addType() === 'income'"
-              [class.text-white]="addType() === 'income'"
-              [class.text-grey-500]="addType() !== 'income'"
-              [attr.aria-pressed]="addType() === 'income'"
-            >
-              Income
-            </button>
-          </div>
-        </div>
-
-        <!-- Amount -->
-        <div class="flex flex-col gap-1">
-          <label for="tx-amount" class="text-preset-5-bold text-grey-500">Amount</label>
-          <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-preset-4 text-beige-500 pointer-events-none select-none">$</span>
-            <input
-              id="tx-amount"
-              [formField]="addForm.amount"
-              type="number"
-              placeholder="0.00"
-              step="0.01"
-              class="w-full border rounded-lg pl-7 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
-              [class.border-beige-500]="!(addForm.amount().touched() && addForm.amount().invalid())"
-              [class.border-red]="addForm.amount().touched() && addForm.amount().invalid()"
-            />
-          </div>
-          @if (addForm.amount().touched() && addForm.amount().invalid()) {
-            <p class="text-preset-5 text-red" role="alert">
-              {{ addForm.amount().errors()[0]?.message ?? 'Amount must be greater than $0.00' }}
-            </p>
-          }
-        </div>
-
-        <!-- Category -->
-        <div class="flex flex-col gap-1">
-          <label class="text-preset-5-bold text-grey-500">Category</label>
-          <div class="relative">
-            <app-dropdown
-              class="!block w-full"
-              [options]="categoryFormOptions"
-              [value]="modalCategory()"
-              (valueChange)="onModalCategoryChange($event)"
-            />
-          </div>
-        </div>
-
-        <!-- Date -->
-        <div class="flex flex-col gap-1">
-          <label for="tx-date" class="text-preset-5-bold text-grey-500">Date</label>
-          <input
-            id="tx-date"
-            [formField]="addForm.date"
-            type="date"
-            class="border rounded-lg px-3 py-3 text-preset-4 text-grey-900 focus:outline-none transition-colors"
-            [class.border-beige-500]="!(addForm.date().touched() && addForm.date().invalid())"
-            [class.border-red]="addForm.date().touched() && addForm.date().invalid()"
-          />
-          @if (addForm.date().touched() && addForm.date().invalid()) {
-            <p class="text-preset-5 text-red" role="alert">
-              {{ addForm.date().errors()[0]?.message ?? 'Date is required' }}
-            </p>
-          }
-        </div>
-
-        <!-- Recurring -->
-        <div class="flex items-center gap-3">
-          <input
-            [formField]="addForm.isRecurring"
-            type="checkbox"
-            id="tx-recurring"
-            class="w-4 h-4 accent-green cursor-pointer"
-          />
-          <label for="tx-recurring" class="text-preset-4 text-grey-900 cursor-pointer select-none">
-            Mark as recurring bill
-          </label>
-        </div>
-
-        <!-- Submit error -->
-        @if (submitError()) {
-          <p class="text-preset-4 text-red" role="alert">{{ submitError() }}</p>
+        @if (addForm.amount().touched() && addForm.amount().invalid()) {
+          <p class="text-preset-5 text-red" role="alert">
+            {{ addForm.amount().errors()[0]?.message ?? 'Amount must be greater than $0.00' }}
+          </p>
         }
+      </div>
 
-        <!-- Submit -->
-        <button
-          type="submit"
-          class="w-full bg-grey-900 text-white rounded-lg py-4 text-preset-4-bold hover:bg-grey-500 transition-colors duration-200 cursor-pointer mt-2"
-        >
-          Add Transaction
-        </button>
+      <!-- Category -->
+      <div class="flex flex-col gap-1">
+        <label class="text-preset-5-bold text-grey-500">Category</label>
+        <div class="relative">
+          <app-dropdown
+            class="!block w-full"
+            [options]="categoryFormOptions"
+            [value]="modalCategory()"
+            (valueChange)="onModalCategoryChange($event)"
+          />
+        </div>
+      </div>
 
-      </form>
-    </div>
-  </div>
+      <!-- Date -->
+      <div class="flex flex-col gap-1">
+        <label for="tx-date" class="text-preset-5-bold text-grey-500">Date</label>
+        <input
+          id="tx-date"
+          [formField]="addForm.date"
+          type="date"
+          class="border rounded-lg px-3 py-3 text-preset-4 text-grey-900 focus:outline-none transition-colors"
+          [class.border-beige-500]="!(addForm.date().touched() && addForm.date().invalid())"
+          [class.border-red]="addForm.date().touched() && addForm.date().invalid()"
+        />
+        @if (addForm.date().touched() && addForm.date().invalid()) {
+          <p class="text-preset-5 text-red" role="alert">
+            {{ addForm.date().errors()[0]?.message ?? 'Date is required' }}
+          </p>
+        }
+      </div>
+
+      <!-- Recurring -->
+      <div class="flex items-center gap-3">
+        <input
+          [formField]="addForm.isRecurring"
+          type="checkbox"
+          id="tx-recurring"
+          class="w-4 h-4 accent-green cursor-pointer"
+        />
+        <label for="tx-recurring" class="text-preset-4 text-grey-900 cursor-pointer select-none">
+          Mark as recurring bill
+        </label>
+      </div>
+
+      <!-- Submit error -->
+      @if (submitError()) {
+        <p class="text-preset-4 text-red" role="alert">{{ submitError() }}</p>
+      }
+
+      <!-- Submit -->
+      <button
+        type="submit"
+        class="w-full bg-grey-900 text-white rounded-lg py-4 text-preset-4-bold hover:bg-grey-500 transition-colors duration-200 cursor-pointer mt-2"
+      >
+        Add Transaction
+      </button>
+
+    </form>
+  </app-modal>
 }

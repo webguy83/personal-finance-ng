@@ -11,8 +11,9 @@ import { RouterLink } from '@angular/router';
 import { form, FormField, submit, required, min as minValidator } from '@angular/forms/signals';
 
 import { AvatarComponent } from '../../core/components/avatar/avatar.component';
-import { DonutChartComponent, DonutLegendItem } from '../../core/components/donut-chart/donut-chart.component';
+import { DonutChartComponent, DonutLegendItem, DonutSegment } from '../../core/components/donut-chart/donut-chart.component';
 import { DropdownComponent, DropdownOption } from '../../core/components/dropdown/dropdown.component';
+import { ModalComponent } from '../../core/components/modal/modal.component';
 import { BudgetService } from '../../core/services/budget.service';
 import { TransactionService } from '../../core/services/transaction.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -42,7 +43,7 @@ type EnrichedBudget = Budget & {
   selector: 'app-budgets',
   templateUrl: './budgets.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AvatarComponent, CurrencyPipe, DatePipe, DonutChartComponent, FormField, DropdownComponent, RouterLink],
+  imports: [AvatarComponent, CurrencyPipe, DatePipe, DonutChartComponent, FormField, DropdownComponent, RouterLink, ModalComponent],
   providers: [CurrencyPipe],
 })
 export class BudgetsComponent {
@@ -52,7 +53,6 @@ export class BudgetsComponent {
   private readonly currencyPipe = inject(CurrencyPipe);
 
   protected readonly loading = this.budgetService.loading;
-  protected readonly themeColors = THEME_COLORS;
 
   // ── Enriched budget data ─────────────────────────────────────────────────────
   protected readonly enrichedBudgets = computed((): EnrichedBudget[] => {
@@ -87,16 +87,17 @@ export class BudgetsComponent {
   );
 
   // ── Donut chart ──────────────────────────────────────────────────────────────
-  protected readonly donutSegments = computed(() => {
+  protected readonly donutSegments = computed((): DonutSegment[] => {
     const budgets = this.enrichedBudgets();
     const total = budgets.reduce((sum, b) => sum + b.maximum, 0);
-    if (total === 0) return [];
+    if (total === 0) {
+      return [];
+    }
     const C = 2 * Math.PI * 80;
-    const GAP = 2;
     let offset = 0;
     return budgets.map((budget) => {
       const fullLen = (budget.maximum / total) * C;
-      const displayLen = Math.max(0, fullLen - GAP);
+      const displayLen = Math.max(0, fullLen);
       const seg = { id: budget.id, theme: budget.theme, dashArray: `${displayLen} ${C}`, dashOffset: -offset };
       offset += fullLen;
       return seg;
@@ -144,6 +145,21 @@ export class BudgetsComponent {
     }));
   });
 
+  protected readonly hasAvailableCategories = computed(() => {
+    const used = new Set(this.budgetService.budgets().map((b) => b.category));
+    return TRANSACTION_CATEGORIES.some((c) => !used.has(c));
+  });
+
+  protected readonly availableThemeColors = computed(() => {
+    const editing = this.editingBudget();
+    const usedThemes = new Set(
+      this.budgetService.budgets()
+        .filter((b) => b.id !== editing?.id)
+        .map((b) => b.theme),
+    );
+    return THEME_COLORS.filter((c) => !usedThemes.has(c));
+  });
+
   protected onCategoryChange(value: string): void {
     this._formModel.update((m) => ({ ...m, category: value as TransactionCategory }));
   }
@@ -154,7 +170,8 @@ export class BudgetsComponent {
 
   protected openAddModal(): void {
     const firstAvailable = (this.modalCategoryOptions()[0]?.value ?? TRANSACTION_CATEGORIES[0]) as TransactionCategory;
-    this._formModel.set({ category: firstAvailable, maximum: 0, theme: THEME_COLORS[0] });
+    const firstTheme = this.availableThemeColors()[0] ?? THEME_COLORS[0];
+    this._formModel.set({ category: firstAvailable, maximum: 0, theme: firstTheme });
     this.editingBudget.set(null);
     this.submitError.set('');
     this.budgetForm().reset();
