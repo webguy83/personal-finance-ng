@@ -6,7 +6,7 @@
     (click)="toggle()"
     [attr.aria-expanded]="isOpen()"
     aria-haspopup="listbox"
-    [attr.aria-label]="ariaLabel()"
+    [attr.aria-label]="ariaLabel() || 'Open menu'"
     class="flex items-center justify-center w-10 h-10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-grey-900 rounded-lg"
   >
     <span

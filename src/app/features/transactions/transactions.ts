@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { form, FormField, submit, required, min as minValidator } from '@angular/forms/signals';
 import { Timestamp } from 'firebase/firestore';
+import { ActivatedRoute } from '@angular/router';
 import { AvatarComponent } from '../../core/components/avatar/avatar.component';
 import { DropdownComponent, DropdownOption } from '../../core/components/dropdown/dropdown.component';
 import { ModalComponent } from '../../core/components/modal/modal.component';
@@ -44,6 +45,7 @@ export class TransactionsComponent {
   private readonly txService = inject(TransactionService);
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly categories = TRANSACTION_CATEGORIES;
 
@@ -68,7 +70,7 @@ export class TransactionsComponent {
   protected readonly searchQuery = signal('');
   protected readonly sortBy = signal<SortOption>('latest');
   protected readonly categoryFilter = signal<TransactionCategory | 'All Transactions'>(
-    'All Transactions',
+    this.categoryFromQueryParam()
   );
   protected readonly currentPage = signal(1);
 
@@ -270,6 +272,12 @@ export class TransactionsComponent {
   protected formatAmount(amount: number): string {
     const abs = Math.abs(amount).toFixed(2);
     return amount >= 0 ? `+$${abs}` : `-$${abs}`;
+  }
+
+  private categoryFromQueryParam(): TransactionCategory | 'All Transactions' {
+    const param = this.route.snapshot.queryParamMap.get('category');
+    const isValid = param !== null && (TRANSACTION_CATEGORIES as string[]).includes(param);
+    return isValid ? (param as TransactionCategory) : 'All Transactions';
   }
 
   private todayString(): string {
