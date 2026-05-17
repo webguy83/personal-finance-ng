@@ -82,8 +82,8 @@ export class BudgetsComponent {
       id: b.id,
       theme: b.theme,
       label: b.category,
-      value: this.currencyPipe.transform(b.spent, 'USD', 'symbol', '1.0-2') ?? '',
-      sub: 'of ' + (this.currencyPipe.transform(b.maximum, 'USD', 'symbol', '1.0-2') ?? ''),
+      value: this.currencyPipe.transform(b.spent, 'USD', 'symbol', '1.2-2') ?? '',
+      sub: 'of ' + (this.currencyPipe.transform(b.maximum, 'USD', 'symbol', '1.2-2') ?? ''),
     }))
   );
 

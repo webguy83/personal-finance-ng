@@ -46,8 +46,8 @@
 
         <app-donut-chart
           [segments]="donutSegments()"
-          [centerLabel]="(totalSpent() | currency:'USD':'symbol':'1.0-2') ?? ''"
-          [centerSub]="'of ' + ((totalBudget() | currency:'USD':'symbol':'1.0-2') ?? '') + ' limit'"
+          [centerLabel]="(totalSpent() | currency:'USD':'symbol':'1.2-2') ?? ''"
+          [centerSub]="'of ' + ((totalBudget() | currency:'USD':'symbol':'1.2-2') ?? '') + ' limit'"
           legendTitle="Spending Summary"
           [legendItems]="donutLegendItems()"
         />
@@ -108,7 +108,7 @@
             </div>
 
             <!-- Maximum label -->
-            <p class="text-preset-4 text-grey-500 mb-4">Maximum of {{ budget.maximum | currency:'USD':'symbol':'1.0-2' }}</p>
+            <p class="text-preset-4 text-grey-500 mb-4">Maximum of {{ budget.maximum | currency:'USD':'symbol':'1.2-2' }}</p>
 
             <!-- Progress bar -->
             <div
@@ -131,11 +131,11 @@
             <div class="flex gap-4 mb-6">
               <div class="flex-1 pl-4 border-l-4" [style.border-color]="budget.theme">
                 <p class="text-preset-5 text-grey-500">Spent</p>
-                <p class="text-preset-4-bold text-grey-900">{{ budget.spent | currency:'USD':'symbol':'1.0-2' }}</p>
+                <p class="text-preset-4-bold text-grey-900">{{ budget.spent | currency:'USD':'symbol':'1.2-2' }}</p>
               </div>
               <div class="flex-1 pl-4 border-l border-grey-100">
                 <p class="text-preset-5 text-grey-500">Remaining</p>
-                <p class="text-preset-4-bold text-grey-900">{{ budget.remaining | currency:'USD':'symbol':'1.0-2' }}</p>
+                <p class="text-preset-4-bold text-grey-900">{{ budget.remaining | currency:'USD':'symbol':'1.2-2' }}</p>
               </div>
             </div>
 
@@ -166,7 +166,7 @@
                       <app-avatar [name]="tx.name" />
                       <p class="flex-1 min-w-0 text-preset-5-bold text-grey-900 truncate">{{ tx.name }}</p>
                       <div class="text-right shrink-0">
-                        <p class="text-preset-5-bold text-grey-900">{{ tx.amount | currency:'USD':'symbol':'1.0-2' }}</p>
+                        <p class="text-preset-5-bold text-grey-900">{{ tx.amount | currency:'USD':'symbol':'1.2-2' }}</p>
                         <p class="text-preset-5 text-grey-500">{{ tx.date.toDate() | date:'dd MMM yyyy' }}</p>
                       </div>
                     </div>
