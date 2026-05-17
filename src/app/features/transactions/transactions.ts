@@ -7,6 +7,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { form, FormField, submit, required, min as minValidator } from '@angular/forms/signals';
 import { Timestamp } from 'firebase/firestore';
 import { ActivatedRoute } from '@angular/router';
@@ -40,12 +41,14 @@ const PAGE_SIZE = 10;
   templateUrl: './transactions.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AvatarComponent, FormField, DropdownComponent, ModalComponent],
+  providers: [DatePipe],
 })
 export class TransactionsComponent {
   private readonly txService = inject(TransactionService);
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly route = inject(ActivatedRoute);
+  private readonly datePipe = inject(DatePipe);
 
   protected readonly categories = TRANSACTION_CATEGORIES;
 
@@ -262,11 +265,7 @@ export class TransactionsComponent {
 
   // ── Display formatters ───────────────────────────────────
   protected formatDate(ts: Timestamp): string {
-    return ts.toDate().toLocaleDateString('en-US', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+    return this.datePipe.transform(ts.toDate(), 'dd MMM y') ?? '';
   }
 
   protected formatAmount(amount: number): string {
@@ -281,6 +280,6 @@ export class TransactionsComponent {
   }
 
   private todayString(): string {
-    return new Date().toISOString().split('T')[0];
+    return this.datePipe.transform(new Date(), 'yyyy-MM-dd') ?? '';
   }
 }
