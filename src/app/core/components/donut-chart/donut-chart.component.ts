@@ -29,6 +29,9 @@ export class DonutChartComponent {
   readonly legendItems = input<DonutLegendItem[]>([]);
   readonly legendTitle = input<string>('');
 
+  protected readonly supportsHover =
+    typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches;
+
   protected readonly hoveredId = signal<string | null>(null);
 
   protected readonly hoveredItem = computed(() => {

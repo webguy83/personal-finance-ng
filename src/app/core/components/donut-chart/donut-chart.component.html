@@ -41,8 +41,8 @@
         [class.hovered]="hoveredId() === seg.id"
         [class.dimmed]="hoveredId() !== null && hoveredId() !== seg.id"
         [style.animation-delay]="i * 80 + 'ms'"
-        (mouseenter)="hoveredId.set(seg.id)"
-        (mouseleave)="hoveredId.set(null)"
+        (mouseenter)="supportsHover && hoveredId.set(seg.id)"
+        (mouseleave)="supportsHover && hoveredId.set(null)"
       />
     }
   </svg>
@@ -63,8 +63,8 @@
       <div
         class="flex items-center justify-between py-4 transition-opacity duration-200"
         [class.opacity-30]="hoveredId() !== null && hoveredId() !== item.id"
-        (mouseenter)="hoveredId.set(item.id)"
-        (mouseleave)="hoveredId.set(null)"
+        (mouseenter)="supportsHover && hoveredId.set(item.id)"
+        (mouseleave)="supportsHover && hoveredId.set(null)"
       >
         <div class="flex items-center gap-4">
           <div class="w-1 h-10 rounded-full shrink-0" [style.background-color]="item.theme"></div>
