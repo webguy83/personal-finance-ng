@@ -26,6 +26,12 @@ const TRANSACTION_CATEGORIES: TransactionCategory[] = [
   'Personal Care', 'Transportation', 'Education', 'Lifestyle', 'Shopping',
 ];
 
+type BudgetFormModel = {
+  category: TransactionCategory;
+  maximum: number | null;
+  theme: string;
+};
+
 
 type EnrichedBudget = Budget & {
   spent: number;
@@ -117,14 +123,15 @@ export class BudgetsComponent {
   protected readonly editingBudget = signal<Budget | null>(null);
   protected readonly submitError = signal('');
 
-  private readonly _formModel = signal<NewBudget>({
+  private readonly _formModel = signal<BudgetFormModel>({
     category: TRANSACTION_CATEGORIES[0],
-    maximum: 0,
+    maximum: null,
     theme: THEME_COLORS[0].value,
   });
 
   protected readonly budgetForm = form(this._formModel, (s) => {
     required(s.category, { message: 'Category is required' });
+    required(s.maximum, { message: 'Maximum is required' });
     minValidator(s.maximum, 0.01, { message: 'Maximum must be greater than $0.00' });
   });
 
@@ -171,7 +178,7 @@ export class BudgetsComponent {
   protected openAddModal(): void {
     const firstAvailable = (this.modalCategoryOptions()[0]?.value ?? TRANSACTION_CATEGORIES[0]) as TransactionCategory;
     const firstTheme = this.themeColorOptions().find((o) => !o.secondaryLabel)?.value ?? THEME_COLORS[0].value;
-    this._formModel.set({ category: firstAvailable, maximum: 0, theme: firstTheme });
+    this._formModel.set({ category: firstAvailable, maximum: null, theme: firstTheme });
     this.editingBudget.set(null);
     this.submitError.set('');
     this.budgetForm().reset();
@@ -199,6 +206,13 @@ export class BudgetsComponent {
     submit(this.budgetForm, async () => {
       const { category, maximum, theme } = this._formModel();
       const editing = this.editingBudget();
+      if (!editing) {
+        const used = new Set(this.budgetService.budgets().map((b) => b.category));
+        if (used.has(category)) {
+          this.submitError.set('A budget for this category already exists.');
+          return;
+        }
+      }
       try {
         if (editing) {
           await this.budgetService.update(uid, editing.id, { category, maximum: Number(maximum), theme });

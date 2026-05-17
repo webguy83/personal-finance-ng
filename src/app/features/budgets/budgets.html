@@ -259,7 +259,8 @@
 
       <button
         type="submit"
-        class="w-full bg-grey-900 text-white rounded-lg py-4 text-preset-4-bold hover:bg-grey-500 transition-colors duration-200 cursor-pointer mt-2"
+        [disabled]="budgetForm().invalid()"
+        class="w-full bg-grey-900 text-white rounded-lg py-4 text-preset-4-bold transition-colors duration-200 mt-2 enabled:hover:bg-grey-500 enabled:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {{ editingBudget() ? 'Save Changes' : 'Add Budget' }}
       </button>
