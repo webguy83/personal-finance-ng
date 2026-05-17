@@ -8,12 +8,27 @@
     [class.pr-10]="!collapsed()"
   >
     <!-- Logo -->
-    <div class="px-8 py-10 shrink-0" [class.px-6]="collapsed()">
-      @if (!collapsed()) {
-        <img src="/logo-large.svg" alt="finance" width="122" height="22" />
-      } @else {
-        <img src="/logo-small.svg" alt="finance" width="14" height="22" />
-      }
+    <div class="px-8 py-10 shrink-0">
+      <div class="relative h-[22px]">
+        <img
+          src="/logo-large.svg"
+          alt="finance"
+          width="122"
+          height="22"
+          class="logo-large absolute left-0 top-0"
+          [class.collapsed]="collapsed()"
+          [attr.aria-hidden]="collapsed() ? 'true' : null"
+        />
+        <img
+          src="/logo-small.svg"
+          alt=""
+          aria-hidden="true"
+          width="14"
+          height="22"
+          class="logo-small absolute left-0 top-0"
+          [class.collapsed]="collapsed()"
+        />
+      </div>
     </div>
 
     <!-- Nav -->
@@ -32,9 +47,7 @@
             class="nav-icon shrink-0 w-6 h-6 bg-grey-300 opacity-60 group-hover:opacity-100 group-hover:bg-white group-[.bg-beige-100]:opacity-100 group-[.bg-beige-100]:bg-green transition-[background-color,opacity] duration-200"
             aria-hidden="true"
           ></span>
-          @if (!collapsed()) {
-            <span class="text-preset-3 font-bold">{{ item.label }}</span>
-          }
+          <span class="sidebar-label text-preset-3 font-bold" [class.collapsed]="collapsed()">{{ item.label }}</span>
         </a>
       }
     </nav>
@@ -54,9 +67,7 @@
         class="nav-icon shrink-0 w-6 h-6 bg-grey-300 group-hover:bg-white transition-[background-color] duration-200"
         aria-hidden="true"
       ></span>
-      @if (!collapsed()) {
-        <span class="text-preset-3 font-bold">Sign Out</span>
-      }
+      <span class="sidebar-label text-preset-3 font-bold" [class.collapsed]="collapsed()">Sign Out</span>
     </button>
 
     <!-- Minimize -->
@@ -75,9 +86,7 @@
         [class.rotate-180]="collapsed()"
         aria-hidden="true"
       ></span>
-      @if (!collapsed()) {
-        <span class="text-preset-3 font-bold">Minimize Menu</span>
-      }
+      <span class="sidebar-label text-preset-3 font-bold" [class.collapsed]="collapsed()">Minimize Menu</span>
     </button>
   </div>
 

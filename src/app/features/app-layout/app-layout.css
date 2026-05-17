@@ -2,6 +2,30 @@
   view-transition-name: sidebar;
 }
 
+.logo-large,
+.logo-small {
+  transition: opacity 300ms ease;
+}
+
+.logo-large { opacity: 1; }
+.logo-large.collapsed { opacity: 0; }
+
+.logo-small { opacity: 0; }
+.logo-small.collapsed { opacity: 1; }
+
+.sidebar-label {
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 200px;
+  opacity: 1;
+  transition: max-width 300ms ease, opacity 200ms ease;
+}
+
+.sidebar-label.collapsed {
+  max-width: 0;
+  opacity: 0;
+}
+
 .mobile-nav-bar {
   view-transition-name: mobile-nav;
 }
