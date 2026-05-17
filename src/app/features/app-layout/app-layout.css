@@ -1,0 +1,11 @@
+.sidebar-panel {
+  view-transition-name: sidebar;
+}
+
+.mobile-nav-bar {
+  view-transition-name: mobile-nav;
+}
+
+.page-main {
+  view-transition-name: page-content;
+}

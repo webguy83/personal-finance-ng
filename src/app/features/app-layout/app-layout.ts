@@ -18,6 +18,7 @@ interface NavItem {
   selector: 'app-layout',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app-layout.html',
+  styleUrl: './app-layout.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppLayoutComponent {

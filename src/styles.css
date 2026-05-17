@@ -78,3 +78,37 @@ a.bg-beige-100:hover {
 @utility text-preset-4-bold { font-size: 0.875rem; font-weight: 700; line-height: 1.5; }
 @utility text-preset-5      { font-size: 0.75rem;  font-weight: 400; line-height: 1.5; }
 @utility text-preset-5-bold { font-size: 0.75rem;  font-weight: 700; line-height: 1.5; }
+
+/* ── Route cross-fade via View Transitions API ───────── */
+/* Disable whole-page capture so the sidebar never animates */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* Only cross-fade the main content area */
+::view-transition-old(page-content) {
+  animation: 180ms ease-out both vt-fade-out;
+}
+
+::view-transition-new(page-content) {
+  animation: 250ms ease-out both vt-fade-in;
+}
+
+@keyframes vt-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page-content),
+  ::view-transition-new(page-content) {
+    animation: none;
+  }
+}

@@ -2,7 +2,7 @@
 
   <!-- Sidebar (desktop) -->
   <div
-    class="hidden lg:flex flex-col bg-grey-900 rounded-r-2xl transition-all duration-300"
+    class="sidebar-panel hidden lg:flex flex-col bg-grey-900 rounded-r-2xl transition-all duration-300"
     [class.w-[300px]]="!collapsed()"
     [class.w-[88px]]="collapsed()"
     [class.pr-10]="!collapsed()"
@@ -82,7 +82,7 @@
 
     <!-- Mobile bottom nav -->
     <nav
-      class="lg:hidden fixed bottom-0 inset-x-0 bg-grey-900 rounded-t-2xl flex justify-around px-3 pt-2 pb-safe z-10"
+      class="mobile-nav-bar lg:hidden fixed bottom-0 inset-x-0 bg-grey-900 rounded-t-2xl flex justify-around px-3 pt-2 pb-safe z-10"
       aria-label="Mobile navigation"
     >
       @for (item of navItems; track item.path) {
@@ -117,7 +117,7 @@
     </nav>
 
     <!-- Page content -->
-    <main class="flex-1 overflow-y-auto px-4 py-6 lg:px-10 lg:py-8 pb-24 lg:pb-8 relative">
+    <main class="page-main flex-1 overflow-y-auto px-4 py-6 lg:px-10 lg:py-8 pb-24 lg:pb-8 relative">
       <router-outlet />
 
       <!-- Global loading overlay -->
