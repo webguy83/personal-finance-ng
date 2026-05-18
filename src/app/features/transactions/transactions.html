@@ -36,7 +36,7 @@
             placeholder="Search transaction"
             [value]="searchQuery()"
             (input)="onSearchInput($event)"
-            class="w-full border border-beige-500 rounded-lg pl-4 pr-10 py-3 text-preset-4 text-grey-900 placeholder:text-beige-500 focus:outline-none focus:border-grey-900 transition-colors"
+            class="w-full border border-beige-500 rounded-lg pl-4 pr-10 py-3 text-preset-4 text-grey-900 placeholder:text-beige-500  focus:border-grey-900 transition-colors"
             aria-label="Search transactions"
           />
           <span
@@ -276,7 +276,7 @@
           [formField]="addForm.name"
           type="text"
           placeholder="e.g. Coffee Shop"
-          class="border rounded-lg px-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
+          class="border rounded-lg px-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300  transition-colors"
           [class.border-beige-500]="!(addForm.name().touched() && addForm.name().invalid())"
           [class.border-red]="addForm.name().touched() && addForm.name().invalid()"
         />
@@ -327,7 +327,7 @@
             type="number"
             placeholder="0.00"
             step="0.01"
-            class="w-full border rounded-lg pl-7 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
+            class="w-full border rounded-lg pl-7 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300  transition-colors"
             [class.border-beige-500]="!(addForm.amount().touched() && addForm.amount().invalid())"
             [class.border-red]="addForm.amount().touched() && addForm.amount().invalid()"
           />
@@ -359,7 +359,7 @@
           id="tx-date"
           [formField]="addForm.date"
           type="date"
-          class="border rounded-lg px-3 py-3 text-preset-4 text-grey-900 focus:outline-none transition-colors"
+          class="border rounded-lg px-3 py-3 text-preset-4 text-grey-900  transition-colors"
           [class.border-beige-500]="!(addForm.date().touched() && addForm.date().invalid())"
           [class.border-red]="addForm.date().touched() && addForm.date().invalid()"
         />

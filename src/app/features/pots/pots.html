@@ -7,7 +7,8 @@
     <button
       type="button"
       (click)="openAddModal()"
-      class="flex items-center gap-2 bg-grey-900 text-white rounded-lg px-4 py-3 text-preset-4-bold transition-colors duration-200 hover:bg-grey-500 cursor-pointer"
+      [disabled]="!canAddPot()"
+      class="flex items-center gap-2 bg-grey-900 text-white rounded-lg px-4 py-3 text-preset-4-bold transition-colors duration-200 enabled:hover:bg-grey-500 enabled:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <span aria-hidden="true" class="text-base leading-none">+</span>
       <span>Add New Pot</span>
@@ -171,7 +172,7 @@
           [formField]="potForm.name"
           type="text"
           placeholder="e.g. Rainy Days"
-          class="w-full border rounded-lg px-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
+          class="w-full border rounded-lg px-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300  transition-colors"
           [class.border-beige-500]="!(potForm.name().touched() && potForm.name().invalid())"
           [class.border-red]="potForm.name().touched() && potForm.name().invalid()"
         />
@@ -199,7 +200,7 @@
             type="number"
             step="0.01"
             placeholder="e.g. 2000"
-            class="w-full border rounded-lg pl-8 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
+            class="w-full border rounded-lg pl-8 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300  transition-colors"
             [class.border-beige-500]="!(potForm.target().touched() && potForm.target().invalid())"
             [class.border-red]="potForm.target().touched() && potForm.target().invalid()"
           />
@@ -290,7 +291,7 @@
 
       <!-- Dual-segment progress bar -->
       <div class="h-2 bg-beige-100 rounded-full overflow-hidden mb-3">
-        <div class="h-full flex">
+        <div class="h-full flex gap-1">
           <!-- Base segment: dark, represents current total (add) or remaining total (withdraw) -->
           <div
             class="h-full shrink-0 bg-grey-900 transition-[width] duration-300"
@@ -337,7 +338,7 @@
             type="number"
             step="0.01"
             placeholder="e.g. 50.00"
-            class="w-full border rounded-lg pl-8 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
+            class="w-full border rounded-lg pl-8 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300  transition-colors"
             [class.border-beige-500]="!(adjustForm.amount().touched() && adjustForm.amount().invalid())"
             [class.border-red]="adjustForm.amount().touched() && adjustForm.amount().invalid()"
           />

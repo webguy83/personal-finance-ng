@@ -89,6 +89,10 @@ export class PotsComponent {
     }));
   });
 
+  protected readonly canAddPot = computed(() =>
+    this.themeColorOptions().some((o) => !o.disabled),
+  );
+
   protected onThemeChange(color: string): void {
     this._formModel.update((m) => ({ ...m, theme: color }));
   }

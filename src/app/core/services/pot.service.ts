@@ -8,8 +8,8 @@ import {
   updateDoc,
   deleteDoc,
   query,
-  orderBy,
   onSnapshot,
+  serverTimestamp,
   DocumentData,
   QuerySnapshot,
   increment,
@@ -48,9 +48,15 @@ export class PotService {
     this.loadingService.add();
     let firstLoad = true;
     const ref = collection(this.firestore, 'users', uid, 'pots');
-    const q = query(ref, orderBy('name'));
+    const q = query(ref);
+    const createdAtSeconds = (pot: Pot): number => {
+      const ts = pot.createdAt as { seconds?: number } | null;
+      return ts?.seconds ?? 0;
+    };
     onSnapshot(q, (snapshot: QuerySnapshot<DocumentData>) => {
-      const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as Pot);
+      const items = snapshot.docs
+        .map((d) => ({ id: d.id, ...d.data() }) as Pot)
+        .sort((a, b) => createdAtSeconds(b) - createdAtSeconds(a));
       this._pots.set(items);
       this._loading.set(false);
       if (firstLoad) { firstLoad = false; this.loadingService.remove(); }
@@ -59,7 +65,7 @@ export class PotService {
 
   async add(uid: string, pot: NewPot): Promise<void> {
     const ref = collection(this.firestore, 'users', uid, 'pots');
-    await addDoc(ref, pot);
+    await addDoc(ref, { ...pot, createdAt: serverTimestamp() });
   }
 
   async update(uid: string, id: string, changes: Partial<NewPot>): Promise<void> {

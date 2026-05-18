@@ -7,7 +7,7 @@
     [attr.aria-expanded]="isOpen()"
     aria-haspopup="listbox"
     [attr.aria-label]="ariaLabel() || 'Open menu'"
-    class="flex items-center justify-center w-10 h-10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-grey-900 rounded-lg"
+    class="flex items-center justify-center w-10 h-10 cursor-pointer  focus-visible:ring-2 focus-visible:ring-grey-900 rounded-lg"
   >
     <span
       class="block w-5 h-5 bg-grey-900 icon-mask"
@@ -23,7 +23,7 @@
     (click)="toggle()"
     [attr.aria-expanded]="isOpen()"
     aria-haspopup="listbox"
-    class="flex items-center justify-between gap-3 border border-beige-500 rounded-lg px-4 py-3 text-preset-4 text-grey-900 bg-white cursor-pointer hover:border-grey-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-grey-900 transition-colors min-w-[114px] w-full whitespace-nowrap"
+    class="flex items-center justify-between gap-3 border border-beige-500 rounded-lg px-4 py-3 text-preset-4 text-grey-900 bg-white cursor-pointer hover:border-grey-900  focus-visible:ring-2 focus-visible:ring-grey-900 transition-colors min-w-[114px] w-full whitespace-nowrap"
   >
     <span class="flex items-center gap-3 min-w-0">
       @if (selectedOption()?.color) {

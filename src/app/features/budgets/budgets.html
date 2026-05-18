@@ -232,7 +232,7 @@
             type="number"
             step="0.01"
             placeholder="e.g. 200"
-            class="w-full border rounded-lg pl-8 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 focus:outline-none transition-colors"
+            class="w-full border rounded-lg pl-8 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300  transition-colors"
             [class.border-beige-500]="!(budgetForm.maximum().touched() && budgetForm.maximum().invalid())"
             [class.border-red]="budgetForm.maximum().touched() && budgetForm.maximum().invalid()"
           />
