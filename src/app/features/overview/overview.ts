@@ -3,7 +3,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Timestamp } from 'firebase/firestore';
 import { AvatarComponent } from '../../core/components/avatar/avatar.component';
-import { DonutChartComponent, DonutSegment } from '../../core/components/donut-chart/donut-chart.component';
+import { DonutChartComponent, DonutLegendItem, DonutSegment } from '../../core/components/donut-chart/donut-chart.component';
 import { TransactionService } from '../../core/services/transaction.service';
 import { BudgetService } from '../../core/services/budget.service';
 import { PotService } from '../../core/services/pot.service';
@@ -27,12 +27,9 @@ export class OverviewComponent {
   private readonly datePipe = inject(DatePipe);
 
   // ── Summary cards ────────────────────────────────────────
-  /** Derived: net of all transactions minus money currently in pots */
-  protected readonly currentBalance = computed(() => {
-    const txNet = this.txService.transactions().reduce((sum, t) => sum + t.amount, 0);
-    const potTotal = this.potService.pots().reduce((sum, p) => sum + p.total, 0);
-    return txNet - potTotal;
-  });
+  protected readonly currentBalance = computed(() =>
+    this.txService.transactions().reduce((sum, t) => sum + t.amount, 0)
+  );
 
   protected readonly income = computed(() =>
     this.txService.transactions()
@@ -88,11 +85,11 @@ export class OverviewComponent {
   );
 
   protected readonly donutCenterLabel = computed(() =>
-    this.currencyPipe.transform(this.totalBudgetSpent(), 'USD', 'symbol', '1.0-2') ?? ''
+    this.currencyPipe.transform(this.totalBudgetSpent(), 'USD', 'symbol', '1.2-2') ?? ''
   );
 
   protected readonly donutCenterSub = computed(() => {
-    const limit = this.currencyPipe.transform(this.totalBudgetLimit(), 'USD', 'symbol', '1.0-2') ?? '';
+    const limit = this.currencyPipe.transform(this.totalBudgetLimit(), 'USD', 'symbol', '1.2-2') ?? '';
     return `of ${limit} limit`;
   });
 
@@ -115,12 +112,13 @@ export class OverviewComponent {
     });
   });
 
-  protected readonly budgetLegendItems = computed(() =>
+  protected readonly budgetLegendItems = computed((): DonutLegendItem[] =>
     this.enrichedBudgets().map(b => ({
       id: b.id,
       theme: b.theme,
       label: b.category,
-      amount: this.currencyPipe.transform(b.spent, 'USD', 'symbol', '1.0-2') ?? '',
+      value: this.currencyPipe.transform(b.spent, 'USD', 'symbol', '1.2-2') ?? '',
+      sub: '',
     }))
   );
 

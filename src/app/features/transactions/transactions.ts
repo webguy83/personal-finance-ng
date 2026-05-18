@@ -15,7 +15,6 @@ import { DropdownComponent, DropdownOption } from '../../core/components/dropdow
 import { ModalComponent } from '../../core/components/modal/modal.component';
 import { TransactionService } from '../../core/services/transaction.service';
 import { AuthService } from '../../core/services/auth.service';
-import { UserService } from '../../core/services/user.service';
 import { TransactionCategory, NewTransaction } from '../../core/models/transaction.model';
 
 type SortOption = 'latest' | 'oldest' | 'az' | 'za' | 'highest' | 'lowest';
@@ -45,7 +44,6 @@ const PAGE_SIZE = 10;
 export class TransactionsComponent {
   private readonly txService = inject(TransactionService);
   private readonly authService = inject(AuthService);
-  private readonly userService = inject(UserService);
   private readonly route = inject(ActivatedRoute);
   private readonly datePipe = inject(DatePipe);
 
@@ -174,7 +172,6 @@ export class TransactionsComponent {
       };
       try {
         await this.txService.add(uid, newTx);
-        await this.userService.adjustBalance(uid, amount);
         this.showAddModal.set(false);
       } catch {
         this.submitError.set('Failed to save transaction. Please try again.');

@@ -152,7 +152,7 @@ export class PotsComponent {
     const uid = this.authService.currentUser()?.uid;
     const pot = this.deletingPot();
     if (!uid || !pot) return;
-    await this.potService.remove(uid, pot.id, pot.total);
+    await this.potService.remove(uid, pot.id);
     this.deletingPot.set(null);
   }
 

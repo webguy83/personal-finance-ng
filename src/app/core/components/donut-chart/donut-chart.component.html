@@ -1,80 +1,112 @@
-<!-- Donut chart -->
-<div class="relative w-full max-w-[240px] mx-auto">
-  <svg viewBox="0 0 200 200" class="w-full" aria-hidden="true">
-    <defs>
-      <!-- clips everything beyond the outer edge of the main ring (r=80 + stroke/2=10 = 90) -->
-      <clipPath id="donut-inner-clip">
-        <circle cx="100" cy="100" r="90" />
-      </clipPath>
-    </defs>
-    <!-- Gray base ring -->
-    <circle cx="100" cy="100" r="80" fill="none" stroke="#F8F4F0" stroke-width="20" />
-    <!-- Lighter tinted arcs — clipped so halo only shows on inner edge -->
-    @for (seg of segments(); track seg.id; let i = $index) {
-      <circle
-        cx="100" cy="100" r="80"
-        fill="none"
-        [attr.stroke]="seg.theme"
-        stroke-width="40"
-        [attr.stroke-dasharray]="seg.dashArray"
-        [attr.stroke-dashoffset]="seg.dashOffset"
-        transform="rotate(-90 100 100)"
-        clip-path="url(#donut-inner-clip)"
-        class="segment-tint"
-        [class.hovered]="hoveredId() === seg.id"
-        [class.dimmed]="hoveredId() !== null && hoveredId() !== seg.id"
-        [style.opacity]="hoveredId() === null ? 0.25 : null"
-        [style.animation-delay]="i * 80 + 'ms'"
-      />
-    }
-    <!-- Main coloured segments -->
-    @for (seg of segments(); track seg.id; let i = $index) {
-      <circle
-        cx="100" cy="100" r="80"
-        fill="none"
-        [attr.stroke]="seg.theme"
-        stroke-width="20"
-        [attr.stroke-dasharray]="seg.dashArray"
-        [attr.stroke-dashoffset]="seg.dashOffset"
-        transform="rotate(-90 100 100)"
-        class="segment-arc"
-        [class.hovered]="hoveredId() === seg.id"
-        [class.dimmed]="hoveredId() !== null && hoveredId() !== seg.id"
-        [style.animation-delay]="i * 80 + 'ms'"
-        (mouseenter)="supportsHover && hoveredId.set(seg.id)"
-        (mouseleave)="supportsHover && hoveredId.set(null)"
-      />
-    }
-  </svg>
-  <!-- Center overlay -->
-  <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-6">
-    <p class="center-value font-bold leading-tight text-grey-900" [style.font-size]="centerLabelFontSize()">{{ displayLabel() }}</p>
-    <p class="center-value text-preset-5 text-grey-500">{{ displaySub() }}</p>
+<!-- ── Shared donut SVG (reused by both layouts via ng-template) ── -->
+<ng-template #donutSvg>
+  <div class="relative w-full max-w-[240px] mx-auto">
+    <svg viewBox="0 0 200 200" class="w-full" aria-hidden="true">
+      <defs>
+        <!-- clips everything beyond the outer edge of the main ring (r=80 + stroke/2=10 = 90) -->
+        <clipPath id="donut-inner-clip">
+          <circle cx="100" cy="100" r="90" />
+        </clipPath>
+      </defs>
+      <!-- Gray base ring -->
+      <circle cx="100" cy="100" r="80" fill="none" stroke="#F8F4F0" stroke-width="20" />
+      <!-- Lighter tinted arcs — clipped so halo only shows on inner edge -->
+      @for (seg of segments(); track seg.id; let i = $index) {
+        <circle
+          cx="100" cy="100" r="80"
+          fill="none"
+          [attr.stroke]="seg.theme"
+          stroke-width="40"
+          [attr.stroke-dasharray]="seg.dashArray"
+          [attr.stroke-dashoffset]="seg.dashOffset"
+          transform="rotate(-90 100 100)"
+          clip-path="url(#donut-inner-clip)"
+          class="segment-tint"
+          [class.hovered]="hoveredId() === seg.id"
+          [class.dimmed]="hoveredId() !== null && hoveredId() !== seg.id"
+          [style.opacity]="hoveredId() === null ? 0.25 : null"
+          [style.animation-delay]="i * 80 + 'ms'"
+        />
+      }
+      <!-- Main coloured segments -->
+      @for (seg of segments(); track seg.id; let i = $index) {
+        <circle
+          cx="100" cy="100" r="80"
+          fill="none"
+          [attr.stroke]="seg.theme"
+          stroke-width="20"
+          [attr.stroke-dasharray]="seg.dashArray"
+          [attr.stroke-dashoffset]="seg.dashOffset"
+          transform="rotate(-90 100 100)"
+          class="segment-arc"
+          [class.hovered]="hoveredId() === seg.id"
+          [class.dimmed]="hoveredId() !== null && hoveredId() !== seg.id"
+          [style.animation-delay]="i * 80 + 'ms'"
+          (mouseenter)="supportsHover && hoveredId.set(seg.id)"
+          (mouseleave)="supportsHover && hoveredId.set(null)"
+        />
+      }
+    </svg>
+    <!-- Center overlay -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-6">
+      <p class="center-value font-bold leading-tight text-grey-900" [style.font-size]="centerLabelFontSize()">{{ displayLabel() }}</p>
+      <p class="center-value text-preset-5 text-grey-500">{{ displaySub() }}</p>
+    </div>
   </div>
-</div>
+</ng-template>
 
-<!-- Legend -->
-@if (legendItems().length > 0) {
-  @if (legendTitle()) {
-    <h2 class="text-preset-2 text-grey-900 mt-8 mb-5">{{ legendTitle() }}</h2>
-  }
-  <div class="divide-y divide-grey-100">
-    @for (item of legendItems(); track item.id) {
-      <div
-        class="flex items-center justify-between py-4 transition-opacity duration-200"
-        [class.opacity-30]="hoveredId() !== null && hoveredId() !== item.id"
-        (mouseenter)="supportsHover && hoveredId.set(item.id)"
-        (mouseleave)="supportsHover && hoveredId.set(null)"
-      >
-        <div class="flex items-center gap-4">
-          <div class="w-1 h-10 rounded-full shrink-0" [style.background-color]="item.theme"></div>
-          <p class="text-preset-4 text-grey-900">{{ item.label }}</p>
+@if (legendLayout() === 'grid') {
+
+  <!-- ── Grid layout: donut left · legend grid right (responsive via .ov-inner) ── -->
+  <div class="ov-inner gap-8">
+    <ng-container [ngTemplateOutlet]="donutSvg" />
+
+    <div class="grid grid-cols-2 gap-x-16 gap-y-4">
+      @for (item of legendItems(); track item.id) {
+        <div
+          class="flex items-center gap-3 min-w-0 transition-opacity duration-200"
+          [class.opacity-30]="hoveredId() !== null && hoveredId() !== item.id"
+          (mouseenter)="supportsHover && hoveredId.set(item.id)"
+          (mouseleave)="supportsHover && hoveredId.set(null)"
+        >
+          <div class="w-1 self-stretch rounded-full shrink-0" [style.background-color]="item.theme"></div>
+          <div class="flex flex-col gap-1 min-w-0">
+            <p class="text-preset-5 text-grey-500 truncate">{{ item.label }}</p>
+            <p class="text-preset-4-bold text-grey-900 truncate">{{ item.value }}</p>
+          </div>
         </div>
-        <div class="text-right">
-          <p class="text-preset-4-bold text-grey-900">{{ item.value }}</p>
-          <p class="text-preset-5 text-grey-500">{{ item.sub }}</p>
-        </div>
-      </div>
-    }
+      }
+    </div>
   </div>
+
+} @else {
+
+  <!-- ── List layout: donut stacked above vertical divided legend (default) ── -->
+  <ng-container [ngTemplateOutlet]="donutSvg" />
+
+  @if (legendItems().length > 0) {
+    @if (legendTitle()) {
+      <h2 class="text-preset-2 text-grey-900 mt-8 mb-5">{{ legendTitle() }}</h2>
+    }
+    <div class="divide-y divide-grey-100">
+      @for (item of legendItems(); track item.id) {
+        <div
+          class="flex items-center justify-between py-4 transition-opacity duration-200"
+          [class.opacity-30]="hoveredId() !== null && hoveredId() !== item.id"
+          (mouseenter)="supportsHover && hoveredId.set(item.id)"
+          (mouseleave)="supportsHover && hoveredId.set(null)"
+        >
+          <div class="flex items-center gap-4">
+            <div class="w-1 h-10 rounded-full shrink-0" [style.background-color]="item.theme"></div>
+            <p class="text-preset-4 text-grey-900">{{ item.label }}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-preset-4-bold text-grey-900">{{ item.value }}</p>
+            <p class="text-preset-5 text-grey-500">{{ item.sub }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
 }

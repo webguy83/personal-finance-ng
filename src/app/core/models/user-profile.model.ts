@@ -4,6 +4,4 @@ export interface UserProfile {
   name: string;
   email: string;
   createdAt: Date;
-  /** Current cash balance */
-  balance: number;
 }

@@ -9,20 +9,20 @@
 
     <!-- Current Balance – dark card -->
     <div class="bg-grey-900 rounded-xl p-6 flex flex-col gap-3">
-      <p class="text-preset-4 text-white/75">Current Balance</p>
-      <p class="text-preset-1 text-white">{{ currentBalance() | currency:'USD':'symbol':'1.2-2' }}</p>
+      <p class="text-preset-4 text-white">Current Balance</p>
+      <p class="text-preset-1 text-white truncate">{{ currentBalance() | currency:'USD':'symbol':'1.2-2' }}</p>
     </div>
 
     <!-- Income -->
     <div class="bg-white rounded-xl p-6 flex flex-col gap-3">
       <p class="text-preset-4 text-grey-500">Income</p>
-      <p class="text-preset-1 text-grey-900">{{ income() | currency:'USD':'symbol':'1.2-2' }}</p>
+      <p class="text-preset-1 text-grey-900 truncate">{{ income() | currency:'USD':'symbol':'1.2-2' }}</p>
     </div>
 
     <!-- Expenses -->
     <div class="bg-white rounded-xl p-6 flex flex-col gap-3">
       <p class="text-preset-4 text-grey-500">Expenses</p>
-      <p class="text-preset-1 text-grey-900">{{ expenses() | currency:'USD':'symbol':'1.2-2' }}</p>
+      <p class="text-preset-1 text-grey-900 truncate">{{ expenses() | currency:'USD':'symbol':'1.2-2' }}</p>
     </div>
 
   </div>
@@ -47,7 +47,7 @@
         <div class="ov-inner gap-4">
 
           <!-- Total Saved sub-card -->
-          <div class="bg-beige-100 rounded-xl p-4 flex items-center gap-4">
+          <div class="bg-beige-100 rounded-xl p-4 flex grow items-center gap-4">
             <img src="/icon-pot.svg" class="w-10 h-10 shrink-0" alt="" aria-hidden="true" />
             <div class="flex flex-col gap-2">
               <p class="text-preset-4 text-grey-500">Total Saved</p>
@@ -117,31 +117,13 @@
           </a>
         </div>
 
-        <div class="ov-inner gap-8">
-
-          <!-- Donut chart -->
-          <div class="flex justify-center">
-            <app-donut-chart
-              [segments]="donutSegments()"
-              [centerLabel]="donutCenterLabel()"
-              [centerSub]="donutCenterSub()"
-            />
-          </div>
-
-          <!-- Budget legend: 2-col grid -->
-          <div class="grid grid-cols-2 gap-x-16 gap-y-4">
-            @for (item of budgetLegendItems(); track item.id) {
-              <div class="flex items-center gap-3 min-w-0">
-                <div class="w-1 self-stretch rounded-full shrink-0" [style.background-color]="item.theme"></div>
-                <div class="flex flex-col gap-1 min-w-0">
-                  <p class="text-preset-5 text-grey-500 truncate">{{ item.label }}</p>
-                  <p class="text-preset-4-bold text-grey-900 truncate">{{ item.amount }}</p>
-                </div>
-              </div>
-            }
-          </div>
-
-        </div>
+        <app-donut-chart
+          [segments]="donutSegments()"
+          [centerLabel]="donutCenterLabel()"
+          [centerSub]="donutCenterSub()"
+          [legendItems]="budgetLegendItems()"
+          legendLayout="grid"
+        />
       </div>
 
       <!-- Recurring Bills card -->

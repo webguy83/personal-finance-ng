@@ -17,14 +17,11 @@ import {
 import { Auth, onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../firebase';
 import { Pot, NewPot } from '../models/pot.model';
-import { UserService } from './user.service';
 
 @Injectable({ providedIn: 'root' })
 export class PotService {
   private readonly auth = inject<Auth>(FIREBASE_AUTH);
   private readonly firestore = inject<Firestore>(FIREBASE_FIRESTORE);
-  private readonly userService = inject(UserService);
-
   private readonly loadingService = inject(LoadingService);
 
   private readonly _pots = signal<Pot[]>([]);
@@ -73,20 +70,15 @@ export class PotService {
     await updateDoc(ref, changes as DocumentData);
   }
 
-  /** Add or withdraw money from a pot; mirrors the delta on the user's balance */
+  /** Add or withdraw money from a pot */
   async adjustTotal(uid: string, id: string, amount: number): Promise<void> {
     const ref = doc(this.firestore, 'users', uid, 'pots', id);
     await updateDoc(ref, { total: increment(amount) });
-    // Adding to pot deducts from balance; withdrawing adds to balance
-    await this.userService.adjustBalance(uid, -amount);
   }
 
-  /** Delete a pot and return its saved total to the user's balance */
-  async remove(uid: string, id: string, potTotal: number): Promise<void> {
+  /** Delete a pot */
+  async remove(uid: string, id: string): Promise<void> {
     const ref = doc(this.firestore, 'users', uid, 'pots', id);
     await deleteDoc(ref);
-    if (potTotal > 0) {
-      await this.userService.adjustBalance(uid, potTotal);
-    }
   }
 }

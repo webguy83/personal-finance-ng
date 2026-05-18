@@ -1,12 +1,9 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { LoadingService } from './loading.service';
 import {
   Firestore,
   doc,
   onSnapshot,
-  updateDoc,
-  DocumentData,
-  increment,
 } from 'firebase/firestore';
 import { Auth, onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../firebase';
@@ -24,7 +21,6 @@ export class UserService {
 
   readonly profile = this._profile.asReadonly();
   readonly loading = this._loading.asReadonly();
-  readonly balance = computed(() => this._profile()?.balance ?? 0);
 
   private unsubscribeSnapshot: (() => void) | null = null;
 
@@ -53,17 +49,5 @@ export class UserService {
       this._loading.set(false);
       if (firstLoad) { firstLoad = false; this.loadingService.remove(); }
     });
-  }
-
-  /** Adjust balance by a delta (positive = add, negative = subtract) */
-  async adjustBalance(uid: string, delta: number): Promise<void> {
-    const ref = doc(this.firestore, 'users', uid);
-    await updateDoc(ref, { balance: increment(delta) } as DocumentData);
-  }
-
-  /** Set balance to an exact value */
-  async setBalance(uid: string, value: number): Promise<void> {
-    const ref = doc(this.firestore, 'users', uid);
-    await updateDoc(ref, { balance: value } as DocumentData);
   }
 }

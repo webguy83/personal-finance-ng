@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 
 export interface DonutSegment {
   id: string;
@@ -20,6 +21,7 @@ export interface DonutLegendItem {
   templateUrl: './donut-chart.component.html',
   styleUrl: './donut-chart.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgTemplateOutlet],
 })
 export class DonutChartComponent {
   readonly segments = input.required<DonutSegment[]>();
@@ -28,11 +30,13 @@ export class DonutChartComponent {
   /** Optional legend items. When omitted the legend is not rendered. */
   readonly legendItems = input<DonutLegendItem[]>([]);
   readonly legendTitle = input<string>('');
+  /** 'list' (default) stacks a vertical divided list below the donut; 'grid' renders a 2-col grid alongside the donut. */
+  readonly legendLayout = input<'list' | 'grid'>('list');
 
-  protected readonly supportsHover =
+  readonly supportsHover =
     typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches;
 
-  protected readonly hoveredId = signal<string | null>(null);
+  readonly hoveredId = signal<string | null>(null);
 
   protected readonly hoveredItem = computed(() => {
     const id = this.hoveredId();
