@@ -162,7 +162,6 @@ export class TransactionsComponent {
     category: 'General' as TransactionCategory,
     amount: 0,
     date: this.todayString(),
-    isRecurring: false,
   });
 
   protected readonly addForm = form(this._addModel, (s) => {
@@ -177,7 +176,6 @@ export class TransactionsComponent {
       category: 'General',
       amount: 0,
       date: this.todayString(),
-      isRecurring: false,
     });
     this.addType.set('expense');
     this.submitError.set('');
@@ -215,7 +213,6 @@ export class TransactionsComponent {
         category: v.category,
         amount,
         date: Timestamp.fromDate(new Date(v.date + 'T00:00:00')),
-        isRecurring: v.isRecurring,
       };
       try {
         await this.txService.add(uid, newTx);

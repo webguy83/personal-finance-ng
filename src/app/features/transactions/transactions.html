@@ -370,19 +370,6 @@
         }
       </div>
 
-      <!-- Recurring -->
-      <div class="flex items-center gap-3">
-        <input
-          [formField]="addForm.isRecurring"
-          type="checkbox"
-          id="tx-recurring"
-          class="w-4 h-4 accent-green cursor-pointer"
-        />
-        <label for="tx-recurring" class="text-preset-4 text-grey-900 cursor-pointer select-none">
-          Mark as recurring bill
-        </label>
-      </div>
-
       <!-- Submit error -->
       @if (submitError()) {
         <p class="text-preset-4 text-red" role="alert">{{ submitError() }}</p>

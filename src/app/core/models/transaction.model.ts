@@ -21,7 +21,6 @@ export interface Transaction {
   date: Timestamp;
   /** Positive = income, negative = expense */
   amount: number;
-  isRecurring: boolean;
 }
 
 export type NewTransaction = Omit<Transaction, 'id'>;
