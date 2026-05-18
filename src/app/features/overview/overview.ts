@@ -1,8 +1,163 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { CurrencyPipe, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { Timestamp } from 'firebase/firestore';
+import { AvatarComponent } from '../../core/components/avatar/avatar.component';
+import { DonutChartComponent, DonutSegment } from '../../core/components/donut-chart/donut-chart.component';
+import { TransactionService } from '../../core/services/transaction.service';
+import { BudgetService } from '../../core/services/budget.service';
+import { PotService } from '../../core/services/pot.service';
+import { RecurringBillService } from '../../core/services/recurring-bill.service';
+
+type BillStatus = 'paid' | 'dueSoon' | 'upcoming';
 
 @Component({
   selector: 'app-overview',
-  template: `<h1 class="text-preset-1 text-grey-900">Overview</h1><p class="text-grey-500 mt-2">Coming soon...</p>`,
+  templateUrl: './overview.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [AvatarComponent, CurrencyPipe, DonutChartComponent, RouterLink],
+  providers: [CurrencyPipe, DatePipe],
 })
-export class OverviewComponent {}
+export class OverviewComponent {
+  private readonly txService = inject(TransactionService);
+  private readonly budgetService = inject(BudgetService);
+  private readonly potService = inject(PotService);
+  private readonly billService = inject(RecurringBillService);
+  private readonly currencyPipe = inject(CurrencyPipe);
+  private readonly datePipe = inject(DatePipe);
+
+  // ── Summary cards ────────────────────────────────────────
+  /** Derived: net of all transactions minus money currently in pots */
+  protected readonly currentBalance = computed(() => {
+    const txNet = this.txService.transactions().reduce((sum, t) => sum + t.amount, 0);
+    const potTotal = this.potService.pots().reduce((sum, p) => sum + p.total, 0);
+    return txNet - potTotal;
+  });
+
+  protected readonly income = computed(() =>
+    this.txService.transactions()
+      .filter(t => t.amount > 0)
+      .reduce((sum, t) => sum + t.amount, 0)
+  );
+
+  protected readonly expenses = computed(() =>
+    this.txService.transactions()
+      .filter(t => t.amount < 0)
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+  );
+
+  // ── Pots ────────────────────────────────────────────────
+  protected readonly totalSaved = computed(() =>
+    this.potService.pots().reduce((sum, p) => sum + p.total, 0)
+  );
+
+  protected readonly topPots = computed(() => this.potService.pots().slice(0, 4));
+
+  // ── Transactions ────────────────────────────────────────
+  protected readonly recentTransactions = computed(() =>
+    this.txService.transactions().slice(0, 5)
+  );
+
+  protected formatDate(ts: Timestamp): string {
+    return this.datePipe.transform(ts.toDate(), 'dd MMM y') ?? '';
+  }
+
+  protected formatAmount(amount: number): string {
+    const abs = Math.abs(amount).toFixed(2);
+    return amount >= 0 ? `+$${abs}` : `-$${abs}`;
+  }
+
+  // ── Budgets ─────────────────────────────────────────────
+  private readonly enrichedBudgets = computed(() => {
+    const budgets = this.budgetService.budgets();
+    const transactions = this.txService.transactions();
+    return budgets.map(budget => {
+      const spent = transactions
+        .filter(tx => tx.category === budget.category && tx.amount < 0)
+        .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+      return { ...budget, spent };
+    });
+  });
+
+  protected readonly totalBudgetSpent = computed(() =>
+    this.enrichedBudgets().reduce((sum, b) => sum + b.spent, 0)
+  );
+
+  protected readonly totalBudgetLimit = computed(() =>
+    this.enrichedBudgets().reduce((sum, b) => sum + b.maximum, 0)
+  );
+
+  protected readonly donutCenterLabel = computed(() =>
+    this.currencyPipe.transform(this.totalBudgetSpent(), 'USD', 'symbol', '1.0-2') ?? ''
+  );
+
+  protected readonly donutCenterSub = computed(() => {
+    const limit = this.currencyPipe.transform(this.totalBudgetLimit(), 'USD', 'symbol', '1.0-2') ?? '';
+    return `of ${limit} limit`;
+  });
+
+  protected readonly donutSegments = computed((): DonutSegment[] => {
+    const budgets = this.enrichedBudgets();
+    const total = budgets.reduce((sum, b) => sum + b.maximum, 0);
+    if (total === 0) return [];
+    const C = 2 * Math.PI * 80;
+    let offset = 0;
+    return budgets.map(budget => {
+      const fullLen = (budget.maximum / total) * C;
+      const seg: DonutSegment = {
+        id: budget.id,
+        theme: budget.theme,
+        dashArray: `${fullLen} ${C}`,
+        dashOffset: -offset,
+      };
+      offset += fullLen;
+      return seg;
+    });
+  });
+
+  protected readonly budgetLegendItems = computed(() =>
+    this.enrichedBudgets().map(b => ({
+      id: b.id,
+      theme: b.theme,
+      label: b.category,
+      amount: this.currencyPipe.transform(b.spent, 'USD', 'symbol', '1.0-2') ?? '',
+    }))
+  );
+
+  // ── Recurring Bills ─────────────────────────────────────
+  private readonly currentMonthBills = computed(() => {
+    const now = new Date();
+    const todayMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const msPerDay = 1000 * 60 * 60 * 24;
+    return this.billService.bills()
+      .filter(b => {
+        const d = b.dueDate.toDate();
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      })
+      .map(b => {
+        const d = b.dueDate.toDate();
+        const dueDayMs = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+        const daysUntil = Math.round((dueDayMs - todayMs) / msPerDay);
+        const status: BillStatus = daysUntil < 0 ? 'paid' : daysUntil <= 7 ? 'dueSoon' : 'upcoming';
+        return { ...b, status };
+      });
+  });
+
+  protected readonly paidBillsTotal = computed(() =>
+    this.currentMonthBills()
+      .filter(b => b.status === 'paid')
+      .reduce((sum, b) => sum + b.amount, 0)
+  );
+
+  protected readonly upcomingBillsTotal = computed(() =>
+    this.currentMonthBills()
+      .filter(b => b.status !== 'paid')
+      .reduce((sum, b) => sum + b.amount, 0)
+  );
+
+  protected readonly dueSoonBillsTotal = computed(() =>
+    this.currentMonthBills()
+      .filter(b => b.status === 'dueSoon')
+      .reduce((sum, b) => sum + b.amount, 0)
+  );
+}

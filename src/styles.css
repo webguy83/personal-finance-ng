@@ -24,6 +24,9 @@
   --color-red:       #C94736;
   --color-purple:    #826CB0;
 
+  /* ── Custom breakpoints ─────────────────────────────── */
+  --breakpoint-2xl: 1400px;
+
   /* ── Other ───────────────────────────────────────────── */
   --color-purple-alt:  #AF81BA;
   --color-turquoise:   #597C7C;
@@ -111,4 +114,23 @@ a.bg-beige-100:hover {
   ::view-transition-new(page-content) {
     animation: none;
   }
+}
+
+/* ── Overview card inner layout ──────────────────────────
+   Stack by default (mobile).
+   Side-by-side between 640px–1023px (card is full-width).
+   Stack again 1024px–1399px (card is half the grid width).
+   Side-by-side again at 1400px+ (card is wide enough).
+───────────────────────────────────────────────────────── */
+.ov-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .ov-inner { flex-direction: row; align-items: center; justify-content: space-between; }
+}
+
+@media (min-width: 1400px) {
+  .ov-inner { flex-direction: row; align-items: center; justify-content: space-between; }
 }

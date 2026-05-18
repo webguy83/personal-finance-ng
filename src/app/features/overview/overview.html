@@ -1,0 +1,193 @@
+<!-- Page wrapper -->
+<div class="flex flex-col gap-8">
+
+  <!-- ── Header ──────────────────────────────────────────── -->
+  <h1 class="text-preset-1 text-grey-900">Overview</h1>
+
+  <!-- ── Summary cards ───────────────────────────────────── -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+
+    <!-- Current Balance – dark card -->
+    <div class="bg-grey-900 rounded-xl p-6 flex flex-col gap-3">
+      <p class="text-preset-4 text-white/75">Current Balance</p>
+      <p class="text-preset-1 text-white">{{ currentBalance() | currency:'USD':'symbol':'1.2-2' }}</p>
+    </div>
+
+    <!-- Income -->
+    <div class="bg-white rounded-xl p-6 flex flex-col gap-3">
+      <p class="text-preset-4 text-grey-500">Income</p>
+      <p class="text-preset-1 text-grey-900">{{ income() | currency:'USD':'symbol':'1.2-2' }}</p>
+    </div>
+
+    <!-- Expenses -->
+    <div class="bg-white rounded-xl p-6 flex flex-col gap-3">
+      <p class="text-preset-4 text-grey-500">Expenses</p>
+      <p class="text-preset-1 text-grey-900">{{ expenses() | currency:'USD':'symbol':'1.2-2' }}</p>
+    </div>
+
+  </div>
+
+  <!-- ── Main two-column grid ─────────────────────────────── -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+    <!-- ── LEFT COLUMN ─────────────────────────────────────── -->
+    <div class="flex flex-col gap-6">
+
+      <!-- Pots card -->
+      <div class="bg-white rounded-xl p-6 lg:p-8">
+
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-preset-2 text-grey-900">Pots</h2>
+          <a routerLink="/pots" class="flex items-center gap-3 text-preset-4 text-grey-500 hover:text-grey-900 transition-colors">
+            <span>See Details</span>
+            <span class="block w-2 h-2 bg-grey-500 icon-mask icon-caret-right" aria-hidden="true"></span>
+          </a>
+        </div>
+
+        <div class="ov-inner gap-4">
+
+          <!-- Total Saved sub-card -->
+          <div class="bg-beige-100 rounded-xl p-4 flex items-center gap-4">
+            <img src="/icon-pot.svg" class="w-10 h-10 shrink-0" alt="" aria-hidden="true" />
+            <div class="flex flex-col gap-2">
+              <p class="text-preset-4 text-grey-500">Total Saved</p>
+              <p class="text-preset-1 text-grey-900">{{ totalSaved() | currency:'USD':'symbol':'1.0-2' }}</p>
+            </div>
+          </div>
+
+          <!-- Individual pots: 2-col grid -->
+          <div class="grid grid-cols-2 gap-x-16 gap-y-4">
+            @for (pot of topPots(); track pot.id) {
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-1 self-stretch rounded-full shrink-0" [style.background-color]="pot.theme"></div>
+                <div class="flex flex-col gap-1 min-w-0">
+                  <p class="text-preset-5 text-grey-500 truncate">{{ pot.name }}</p>
+                  <p class="text-preset-4-bold text-grey-900 truncate">{{ pot.total | currency:'USD':'symbol':'1.0-2' }}</p>
+                </div>
+              </div>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Transactions card -->
+      <div class="bg-white rounded-xl p-6 lg:p-8">
+
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-preset-2 text-grey-900">Transactions</h2>
+          <a routerLink="/transactions" class="flex items-center gap-3 text-preset-4 text-grey-500 hover:text-grey-900 transition-colors">
+            <span>View All</span>
+            <span class="block w-2 h-2 bg-grey-500 icon-mask icon-caret-right" aria-hidden="true"></span>
+          </a>
+        </div>
+
+        <div>
+          @for (tx of recentTransactions(); track tx.id) {
+            <div class="flex items-center gap-4 py-4 border-b border-grey-100 last:border-0">
+              <app-avatar [name]="tx.name" />
+              <p class="text-preset-4-bold text-grey-900 flex-1 min-w-0 truncate">{{ tx.name }}</p>
+              <div class="text-right shrink-0">
+                <p
+                  class="text-preset-4-bold"
+                  [class.text-green]="tx.amount >= 0"
+                  [class.text-grey-900]="tx.amount < 0"
+                >{{ formatAmount(tx.amount) }}</p>
+                <p class="text-preset-5 text-grey-500">{{ formatDate(tx.date) }}</p>
+              </div>
+            </div>
+          }
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT COLUMN ─────────────────────────────────────── -->
+    <div class="flex flex-col gap-6">
+
+      <!-- Budgets card -->
+      <div class="bg-white rounded-xl p-6 lg:p-8">
+
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-preset-2 text-grey-900">Budgets</h2>
+          <a routerLink="/budgets" class="flex items-center gap-3 text-preset-4 text-grey-500 hover:text-grey-900 transition-colors">
+            <span>See Details</span>
+            <span class="block w-2 h-2 bg-grey-500 icon-mask icon-caret-right" aria-hidden="true"></span>
+          </a>
+        </div>
+
+        <div class="ov-inner gap-8">
+
+          <!-- Donut chart -->
+          <div class="flex justify-center">
+            <app-donut-chart
+              [segments]="donutSegments()"
+              [centerLabel]="donutCenterLabel()"
+              [centerSub]="donutCenterSub()"
+            />
+          </div>
+
+          <!-- Budget legend: 2-col grid -->
+          <div class="grid grid-cols-2 gap-x-16 gap-y-4">
+            @for (item of budgetLegendItems(); track item.id) {
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-1 self-stretch rounded-full shrink-0" [style.background-color]="item.theme"></div>
+                <div class="flex flex-col gap-1 min-w-0">
+                  <p class="text-preset-5 text-grey-500 truncate">{{ item.label }}</p>
+                  <p class="text-preset-4-bold text-grey-900 truncate">{{ item.amount }}</p>
+                </div>
+              </div>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Recurring Bills card -->
+      <div class="bg-white rounded-xl p-6 lg:p-8">
+
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-preset-2 text-grey-900">Recurring Bills</h2>
+          <a routerLink="/recurring-bills" class="flex items-center gap-3 text-preset-4 text-grey-500 hover:text-grey-900 transition-colors">
+            <span>See Details</span>
+            <span class="block w-2 h-2 bg-grey-500 icon-mask icon-caret-right" aria-hidden="true"></span>
+          </a>
+        </div>
+
+        <div class="flex flex-col gap-3">
+
+          <!-- Paid Bills -->
+          <div class="bg-beige-100 rounded-xl overflow-hidden flex items-stretch">
+            <div class="w-1 shrink-0" [style.background-color]="'#277C78'"></div>
+            <div class="flex flex-1 items-center justify-between px-4 py-4">
+              <p class="text-preset-4 text-grey-500">Paid Bills</p>
+              <p class="text-preset-4-bold text-grey-900">{{ paidBillsTotal() | currency:'USD':'symbol':'1.2-2' }}</p>
+            </div>
+          </div>
+
+          <!-- Total Upcoming -->
+          <div class="bg-beige-100 rounded-xl overflow-hidden flex items-stretch">
+            <div class="w-1 shrink-0" [style.background-color]="'#F2CDAC'"></div>
+            <div class="flex flex-1 items-center justify-between px-4 py-4">
+              <p class="text-preset-4 text-grey-500">Total Upcoming</p>
+              <p class="text-preset-4-bold text-grey-900">{{ upcomingBillsTotal() | currency:'USD':'symbol':'1.2-2' }}</p>
+            </div>
+          </div>
+
+          <!-- Due Soon -->
+          <div class="bg-beige-100 rounded-xl overflow-hidden flex items-stretch">
+            <div class="w-1 shrink-0" [style.background-color]="'#82C9D7'"></div>
+            <div class="flex flex-1 items-center justify-between px-4 py-4">
+              <p class="text-preset-4 text-grey-500">Due Soon</p>
+              <p class="text-preset-4-bold text-grey-900">{{ dueSoonBillsTotal() | currency:'USD':'symbol':'1.2-2' }}</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
