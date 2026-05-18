@@ -5,7 +5,6 @@ export interface RecurringBill {
   name: string;
   amount: number;
   dueDate: Timestamp;
-  isPaid: boolean;
   category: string;
 }
 

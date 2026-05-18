@@ -133,7 +133,7 @@
 
         <!-- ── Transaction rows ──────────────────────── -->
         <div role="list" aria-label="Transactions">
-          @for (tx of paginated(); track tx.id) {
+          @for (tx of pagination.paginated(); track tx.id) {
             <div
               role="listitem"
               class="flex items-center gap-4 py-4 border-b border-grey-100 last:border-0"
@@ -173,14 +173,14 @@
         </div>
 
         <!-- ── Pagination ─────────────────────────────── -->
-        @if (totalPages() > 1) {
+        @if (pagination.totalPages() > 1) {
           <nav aria-label="Pagination" class="flex items-stretch justify-between mt-6">
 
             <!-- Prev -->
             <button
               type="button"
-              (click)="setPage(currentPage() - 1)"
-              [disabled]="currentPage() === 1"
+              (click)="pagination.setPage(pagination.currentPage() - 1)"
+              [disabled]="pagination.currentPage() === 1"
               class="flex items-center gap-2 border border-beige-500 rounded-lg px-2 sm:px-4 py-2 text-preset-4 text-grey-900 hover:bg-grey-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
               aria-label="Previous page"
             >
@@ -193,17 +193,17 @@
 
             <!-- Page numbers — mobile (compact) -->
             <div class="flex sm:hidden items-stretch gap-1" role="group" aria-label="Page numbers">
-              @for (page of mobilePageNumbers(); track $index) {
+              @for (page of pagination.mobilePageNumbers(); track $index) {
                 @if (page === '...') {
                   <span class="w-6 flex items-center justify-center text-preset-5 text-grey-500" aria-hidden="true">…</span>
                 } @else {
                   <button
                     type="button"
-                    (click)="setPage(page)"
+                    (click)="pagination.setPage(page)"
                     class="w-8 rounded-lg text-preset-5-bold transition-colors cursor-pointer border border-beige-500"
-                    [class]="pageButtonClass(page)"
+                    [class]="pagination.pageButtonClass(page)"
                     [attr.aria-label]="'Page ' + page"
-                    [attr.aria-current]="currentPage() === page ? 'page' : null"
+                    [attr.aria-current]="pagination.currentPage() === page ? 'page' : null"
                   >
                     {{ page }}
                   </button>
@@ -213,17 +213,17 @@
 
             <!-- Page numbers — desktop -->
             <div class="hidden sm:flex items-stretch gap-1" role="group" aria-label="Page numbers">
-              @for (page of pageNumbers(); track $index) {
+              @for (page of pagination.pageNumbers(); track $index) {
                 @if (page === '...') {
                   <span class="w-8 flex items-center justify-center text-preset-4 text-grey-500" aria-hidden="true">…</span>
                 } @else {
                   <button
                     type="button"
-                    (click)="setPage(page)"
+                    (click)="pagination.setPage(page)"
                     class="w-10 rounded-lg text-preset-4-bold transition-colors cursor-pointer border border-beige-500"
-                    [class]="pageButtonClass(page)"
+                    [class]="pagination.pageButtonClass(page)"
                     [attr.aria-label]="'Page ' + page"
-                    [attr.aria-current]="currentPage() === page ? 'page' : null"
+                    [attr.aria-current]="pagination.currentPage() === page ? 'page' : null"
                   >
                     {{ page }}
                   </button>
@@ -234,8 +234,8 @@
             <!-- Next -->
             <button
               type="button"
-              (click)="setPage(currentPage() + 1)"
-              [disabled]="currentPage() === totalPages()"
+              (click)="pagination.setPage(pagination.currentPage() + 1)"
+              [disabled]="pagination.currentPage() === pagination.totalPages()"
               class="flex items-center gap-2 border border-beige-500 rounded-lg px-2 sm:px-4 py-2 text-preset-4 text-grey-900 hover:bg-grey-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
               aria-label="Next page"
             >

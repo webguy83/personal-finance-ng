@@ -5,11 +5,10 @@ import {
   collection,
   doc,
   addDoc,
-  updateDoc,
   deleteDoc,
   onSnapshot,
-  DocumentData,
   QuerySnapshot,
+  DocumentData,
 } from 'firebase/firestore';
 import { Auth, onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../firebase';
@@ -53,11 +52,6 @@ export class RecurringBillService {
   async add(uid: string, bill: NewRecurringBill): Promise<void> {
     const ref = collection(this.firestore, 'users', uid, 'recurring-bills');
     await addDoc(ref, bill);
-  }
-
-  async markPaid(uid: string, id: string, isPaid: boolean): Promise<void> {
-    const ref = doc(this.firestore, 'users', uid, 'recurring-bills', id);
-    await updateDoc(ref, { isPaid } as DocumentData);
   }
 
   async remove(uid: string, id: string): Promise<void> {

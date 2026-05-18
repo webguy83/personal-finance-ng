@@ -135,7 +135,7 @@
 
         <!-- ── Bill rows ──────────────────────────────────── -->
         <div role="list" aria-label="Recurring bills">
-          @for (bill of filteredBills(); track bill.name) {
+          @for (bill of pagination.paginated(); track bill.name) {
             <div
               role="listitem"
               class="flex items-center gap-4 py-4 border-b border-grey-100 last:border-0"
@@ -189,9 +189,184 @@
           }
         </div>
 
+        <!-- ── Pagination ─────────────────────────────── -->
+        @if (pagination.totalPages() > 1) {
+          <nav aria-label="Pagination" class="flex items-stretch justify-between mt-6">
+
+            <!-- Prev -->
+            <button
+              type="button"
+              (click)="pagination.setPage(pagination.currentPage() - 1)"
+              [disabled]="pagination.currentPage() === 1"
+              class="flex items-center gap-2 border border-beige-500 rounded-lg px-2 sm:px-4 py-2 text-preset-4 text-grey-900 hover:bg-grey-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              aria-label="Previous page"
+            >
+              <span
+                class="block w-3 h-3 bg-grey-900 icon-mask icon-caret-left"
+                aria-hidden="true"
+              ></span>
+              <span class="hidden sm:inline">Prev</span>
+            </button>
+
+            <!-- Page numbers — mobile (compact) -->
+            <div class="flex sm:hidden items-stretch gap-1" role="group" aria-label="Page numbers">
+              @for (page of pagination.mobilePageNumbers(); track $index) {
+                @if (page === '...') {
+                  <span class="w-6 flex items-center justify-center text-preset-5 text-grey-500" aria-hidden="true">…</span>
+                } @else {
+                  <button
+                    type="button"
+                    (click)="pagination.setPage(page)"
+                    class="w-8 rounded-lg text-preset-5-bold transition-colors cursor-pointer border border-beige-500"
+                    [class]="pagination.pageButtonClass(page)"
+                    [attr.aria-label]="'Page ' + page"
+                    [attr.aria-current]="pagination.currentPage() === page ? 'page' : null"
+                  >
+                    {{ page }}
+                  </button>
+                }
+              }
+            </div>
+
+            <!-- Page numbers — desktop -->
+            <div class="hidden sm:flex items-stretch gap-1" role="group" aria-label="Page numbers">
+              @for (page of pagination.pageNumbers(); track $index) {
+                @if (page === '...') {
+                  <span class="w-8 flex items-center justify-center text-preset-4 text-grey-500" aria-hidden="true">…</span>
+                } @else {
+                  <button
+                    type="button"
+                    (click)="pagination.setPage(page)"
+                    class="w-10 rounded-lg text-preset-4-bold transition-colors cursor-pointer border border-beige-500"
+                    [class]="pagination.pageButtonClass(page)"
+                    [attr.aria-label]="'Page ' + page"
+                    [attr.aria-current]="pagination.currentPage() === page ? 'page' : null"
+                  >
+                    {{ page }}
+                  </button>
+                }
+              }
+            </div>
+
+            <!-- Next -->
+            <button
+              type="button"
+              (click)="pagination.setPage(pagination.currentPage() + 1)"
+              [disabled]="pagination.currentPage() === pagination.totalPages()"
+              class="flex items-center gap-2 border border-beige-500 rounded-lg px-2 sm:px-4 py-2 text-preset-4 text-grey-900 hover:bg-grey-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              aria-label="Next page"
+            >
+              <span class="hidden sm:inline">Next</span>
+              <span
+                class="block w-3 h-3 bg-grey-900 icon-mask icon-caret-right"
+                aria-hidden="true"
+              ></span>
+            </button>
+
+          </nav>
+        }
+
       }
     </div>
 
   }
 
 </div>
+<!-- /Page wrapper -->
+
+<!-- ── Add Bill Modal ─────────────────────────────────────── -->
+@if (showAddModal()) {
+  <app-modal title="Add New Bill" (closed)="closeAddModal()">
+    <p modal-description class="text-preset-4 text-grey-500 mb-5">
+      Add a recurring bill to track your monthly expenses.
+    </p>
+
+    <form (submit)="onSubmit($event)" novalidate class="flex flex-col gap-4">
+
+      <!-- Bill Name -->
+      <div class="flex flex-col gap-1">
+        <label for="bill-name" class="text-preset-5-bold text-grey-500">Bill Name</label>
+        <input
+          id="bill-name"
+          [formField]="addForm.name"
+          type="text"
+          placeholder="e.g. Netflix"
+          class="border rounded-lg px-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 transition-colors"
+          [class.border-beige-500]="!(addForm.name().touched() && addForm.name().invalid())"
+          [class.border-red]="addForm.name().touched() && addForm.name().invalid()"
+        />
+        @if (addForm.name().touched() && addForm.name().invalid()) {
+          <p class="text-preset-5 text-red" role="alert">
+            {{ addForm.name().errors()[0]?.message ?? 'Bill name is required' }}
+          </p>
+        }
+      </div>
+
+      <!-- Amount -->
+      <div class="flex flex-col gap-1">
+        <label for="bill-amount" class="text-preset-5-bold text-grey-500">Amount</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-preset-4 text-beige-500 pointer-events-none select-none">$</span>
+          <input
+            id="bill-amount"
+            [formField]="addForm.amount"
+            type="number"
+            placeholder="0.00"
+            step="0.01"
+            class="w-full border rounded-lg pl-7 pr-3 py-3 text-preset-4 text-grey-900 placeholder:text-grey-300 transition-colors"
+            [class.border-beige-500]="!(addForm.amount().touched() && addForm.amount().invalid())"
+            [class.border-red]="addForm.amount().touched() && addForm.amount().invalid()"
+          />
+        </div>
+        @if (addForm.amount().touched() && addForm.amount().invalid()) {
+          <p class="text-preset-5 text-red" role="alert">
+            {{ addForm.amount().errors()[0]?.message ?? 'Amount must be greater than $0.00' }}
+          </p>
+        }
+      </div>
+
+      <!-- Category -->
+      <div class="flex flex-col gap-1">
+        <label class="text-preset-5-bold text-grey-500">Category</label>
+        <app-dropdown
+          class="!block w-full"
+          [options]="billCategoryOptions"
+          [value]="modalCategory()"
+          (valueChange)="onModalCategoryChange($event)"
+        />
+      </div>
+
+      <!-- Due Date -->
+      <div class="flex flex-col gap-1">
+        <label for="bill-due-date" class="text-preset-5-bold text-grey-500">Due Date</label>
+        <input
+          id="bill-due-date"
+          [formField]="addForm.dueDate"
+          type="date"
+          class="border rounded-lg px-3 py-3 text-preset-4 text-grey-900 transition-colors"
+          [class.border-beige-500]="!(addForm.dueDate().touched() && addForm.dueDate().invalid())"
+          [class.border-red]="addForm.dueDate().touched() && addForm.dueDate().invalid()"
+        />
+        @if (addForm.dueDate().touched() && addForm.dueDate().invalid()) {
+          <p class="text-preset-5 text-red" role="alert">
+            {{ addForm.dueDate().errors()[0]?.message ?? 'Due date is required' }}
+          </p>
+        }
+      </div>
+
+      <!-- Submit error -->
+      @if (submitError()) {
+        <p class="text-preset-4 text-red" role="alert">{{ submitError() }}</p>
+      }
+
+      <!-- Submit -->
+      <button
+        type="submit"
+        class="w-full bg-grey-900 text-white rounded-lg py-4 text-preset-4-bold hover:bg-grey-500 transition-colors duration-200 cursor-pointer mt-2"
+      >
+        Add Bill
+      </button>
+
+    </form>
+  </app-modal>
+}

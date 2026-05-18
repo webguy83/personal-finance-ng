@@ -2,11 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   signal,
-  untracked,
 } from '@angular/core';
+import { createPagination } from '../../core/utils/pagination';
 import { DatePipe } from '@angular/common';
 import { form, FormField, submit, required, min as minValidator } from '@angular/forms/signals';
 import { Timestamp } from 'firebase/firestore';
@@ -75,7 +74,6 @@ export class TransactionsComponent {
   protected readonly categoryFilter = signal<TransactionCategory | 'All Transactions'>(
     this.categoryFromQueryParam()
   );
-  protected readonly currentPage = signal(1);
 
   // ── Service data ─────────────────────────────────────────
   protected readonly loading = this.txService.loading;
@@ -106,51 +104,11 @@ export class TransactionsComponent {
     }
   });
 
-  protected readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.filtered().length / PAGE_SIZE)),
+  protected readonly pagination = createPagination(
+    this.filtered,
+    PAGE_SIZE,
+    [this.searchQuery, this.categoryFilter, this.sortBy],
   );
-
-  protected readonly paginated = computed(() => {
-    const start = (this.currentPage() - 1) * PAGE_SIZE;
-    return this.filtered().slice(start, start + PAGE_SIZE);
-  });
-
-  protected readonly pageNumbers = computed((): (number | '...')[] => {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-    const pages: (number | '...')[] = [1];
-    if (current > 3) pages.push('...');
-    for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++)
-      pages.push(i);
-    if (current < total - 2) pages.push('...');
-    pages.push(total);
-    return pages;
-  });
-
-  // Compact variant for mobile — same ±1 window as desktop but max 5 page items
-  protected readonly mobilePageNumbers = computed((): (number | '...')[] => {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
-    const pages: (number | '...')[] = [1];
-    if (current > 3) pages.push('...');
-    for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++)
-      pages.push(i);
-    if (current < total - 2) pages.push('...');
-    pages.push(total);
-    return pages;
-  });
-
-  constructor() {
-    // Reset to page 1 whenever any filter/sort changes
-    effect(() => {
-      this.searchQuery();
-      this.categoryFilter();
-      this.sortBy();
-      untracked(() => this.currentPage.set(1));
-    });
-  }
 
   // ── Add Transaction modal ────────────────────────────────
   protected readonly showAddModal = signal(false);
@@ -222,19 +180,6 @@ export class TransactionsComponent {
         this.submitError.set('Failed to save transaction. Please try again.');
       }
     });
-  }
-
-  // ── Pagination helpers ───────────────────────────────────
-  protected setPage(page: number | '...'): void {
-    if (page === '...') return;
-    this.currentPage.set(Math.max(1, Math.min(page, this.totalPages())));
-  }
-
-  protected pageButtonClass(page: number | '...'): string {
-    if (page === '...') return '';
-    return (page) === this.currentPage()
-      ? 'bg-grey-900 text-white'
-      : 'text-grey-900 hover:bg-grey-100';
   }
 
   // ── Toolbar event handlers ───────────────────────────────
