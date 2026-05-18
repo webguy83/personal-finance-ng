@@ -40,6 +40,7 @@ src/environments/environment.ts
 src/environments/environment.prod.ts
 scripts/.env
 scripts/seed-budgets.mjs
+scripts/seed-recurring-bills.mjs
 
 # System files
 .DS_Store

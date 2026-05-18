@@ -1,0 +1,197 @@
+<!-- Page wrapper -->
+<div class="flex flex-col gap-8">
+
+  <!-- ── Header ──────────────────────────────────────────── -->
+  <div class="flex items-center justify-between">
+    <h1 class="text-preset-1 text-grey-900">Recurring Bills</h1>
+    <button
+      type="button"
+      (click)="openAddModal()"
+      class="flex items-center gap-1 bg-grey-900 text-white rounded-lg px-4 py-3 text-preset-4-bold hover:bg-grey-500 transition-colors duration-200 cursor-pointer"
+    >
+      <span aria-hidden="true" class="text-base leading-none">+</span>
+      <span class="hidden sm:inline">Add Bill</span>
+    </button>
+  </div>
+
+  <!-- ── Loading ─────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="bg-white rounded-xl p-8 flex justify-center items-center min-h-48">
+      <p class="text-preset-4 text-grey-500">Loading bills…</p>
+    </div>
+  } @else {
+
+    <!-- ── Top cards ─────────────────────────────────────── -->
+    <div class="grid grid-cols-1 sm:grid-cols-[2fr_3fr] gap-6">
+
+      <!-- Black card -->
+      <div class="bg-grey-900 rounded-xl p-6 flex flex-col justify-between gap-12 min-h-44">
+        <img src="/icon-nav-recurring-bills.svg" class="w-8 h-8 brightness-0 invert" alt="" aria-hidden="true" />
+        <div class="flex flex-col gap-3">
+          <p class="text-preset-4 text-white/75">Total Bills</p>
+          <p class="text-preset-1 text-white">{{ totalBills() | currency:'USD':'symbol':'1.2-2' }}</p>
+        </div>
+      </div>
+
+      <!-- Summary card -->
+      <div class="bg-white rounded-xl p-6">
+        <h2 class="text-preset-3 text-grey-900 mb-5">Summary</h2>
+        <div class="flex flex-col">
+          <div class="flex items-center justify-between py-3 border-b border-grey-100">
+            <p class="text-preset-4 text-grey-500">Paid Bills</p>
+            <p class="text-preset-4-bold text-grey-900">
+              {{ paidBills().length }} ({{ paidTotal() | currency:'USD':'symbol':'1.2-2' }})
+            </p>
+          </div>
+          <div class="flex items-center justify-between py-3 border-b border-grey-100">
+            <p class="text-preset-4 text-grey-500">Total Upcoming</p>
+            <p class="text-preset-4-bold text-grey-900">
+              {{ upcomingBills().length }} ({{ upcomingTotal() | currency:'USD':'symbol':'1.2-2' }})
+            </p>
+          </div>
+          <div class="flex items-center justify-between pt-3">
+            <p class="text-preset-4 text-red">Due Soon</p>
+            <p class="text-preset-4-bold text-red">
+              {{ dueSoonBills().length }} ({{ dueSoonTotal() | currency:'USD':'symbol':'1.2-2' }})
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Bills card ─────────────────────────────────────── -->
+    <div class="bg-white rounded-xl p-6 lg:p-8">
+
+      <!-- Toolbar -->
+      <div class="flex items-center gap-3 sm:gap-4 mb-6">
+
+        <!-- Search -->
+        <div class="relative flex-1 max-w-[320px] mr-auto">
+          <input
+            type="text"
+            placeholder="Search bills"
+            [value]="searchQuery()"
+            (input)="onSearchInput($event)"
+            class="w-full border border-beige-500 rounded-lg pl-4 pr-10 py-3 text-preset-4 text-grey-900 placeholder:text-beige-500 focus:border-grey-900 transition-colors"
+            aria-label="Search bills"
+          />
+          <span
+            class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 block w-4 h-4 bg-grey-500 icon-mask icon-search"
+            aria-hidden="true"
+          ></span>
+        </div>
+
+        <!-- Sort By — desktop -->
+        <div class="hidden sm:flex items-center gap-2 shrink-0">
+          <span class="text-preset-4 text-grey-500 whitespace-nowrap">Sort by</span>
+          <app-dropdown
+            [options]="sortOptions"
+            [value]="sortBy()"
+            (valueChange)="onSortChange($event)"
+          />
+        </div>
+
+        <!-- Sort By — mobile icon -->
+        <div class="sm:hidden shrink-0">
+          <app-dropdown
+            [options]="sortOptions"
+            [value]="sortBy()"
+            (valueChange)="onSortChange($event)"
+            iconSrc="/icon-sort-mobile.svg"
+            ariaLabel="Sort by"
+          />
+        </div>
+
+      </div>
+      <!-- /Toolbar -->
+
+      <!-- Column headers — sm+ only -->
+      <div
+        class="hidden sm:flex items-center gap-4 pb-3 border-b border-grey-100 text-preset-5 text-grey-500"
+        role="row"
+        aria-hidden="true"
+      >
+        <span class="w-10 shrink-0"></span>
+        <span class="flex-1 min-w-0">Bill Title</span>
+        <span class="flex-1">Due Date</span>
+        <span class="w-20 shrink-0 text-right">Amount</span>
+      </div>
+
+      <!-- ── Empty state ────────────────────────────────── -->
+      @if (filteredBills().length === 0) {
+        <div class="py-12 flex flex-col items-center gap-3 text-center">
+          <p class="text-preset-3 text-grey-900">No bills found</p>
+          <p class="text-preset-4 text-grey-500">
+            @if (searchQuery()) {
+              Try adjusting your search.
+            } @else {
+              Add your first recurring bill to get started.
+            }
+          </p>
+        </div>
+
+      } @else {
+
+        <!-- ── Bill rows ──────────────────────────────────── -->
+        <div role="list" aria-label="Recurring bills">
+          @for (bill of filteredBills(); track bill.name) {
+            <div
+              role="listitem"
+              class="flex items-center gap-4 py-4 border-b border-grey-100 last:border-0"
+            >
+              <!-- Avatar -->
+              <app-avatar [name]="bill.name" />
+
+              <!-- Name (+ mobile: due date below) -->
+              <div class="flex-1 min-w-0">
+                <p class="text-preset-4-bold text-grey-900 truncate">{{ bill.name }}</p>
+                <div class="flex items-center gap-1 sm:hidden">
+                  <p
+                    class="text-preset-5"
+                    [class.text-green]="bill.status === 'paid'"
+                    [class.text-red]="bill.status === 'dueSoon'"
+                    [class.text-grey-500]="bill.status === 'upcoming'"
+                  >Monthly · {{ ordinal(bill.day) }}</p>
+                  @if (bill.status === 'paid') {
+                    <img src="/icon-bill-paid.svg" class="w-3 h-3" alt="Paid" />
+                  } @else if (bill.status === 'dueSoon') {
+                    <img src="/icon-bill-due.svg" class="w-3 h-3" alt="Due soon" />
+                  }
+                </div>
+              </div>
+
+              <!-- Due date — sm+ -->
+              <div class="hidden sm:flex items-center gap-2 flex-1">
+                <p
+                  class="text-preset-4"
+                  [class.text-green]="bill.status === 'paid'"
+                  [class.text-red]="bill.status === 'dueSoon'"
+                  [class.text-grey-500]="bill.status === 'upcoming'"
+                >Monthly · {{ ordinal(bill.day) }}</p>
+                @if (bill.status === 'paid') {
+                  <img src="/icon-bill-paid.svg" class="w-4 h-4" alt="Paid" />
+                } @else if (bill.status === 'dueSoon') {
+                  <img src="/icon-bill-due.svg" class="w-4 h-4" alt="Due soon" />
+                }
+              </div>
+
+              <!-- Amount -->
+              <div class="shrink-0 text-right w-20">
+                <p
+                  class="text-preset-4-bold"
+                  [class.text-red]="bill.status === 'dueSoon'"
+                  [class.text-grey-900]="bill.status !== 'dueSoon'"
+                >{{ bill.amount | currency:'USD':'symbol':'1.2-2' }}</p>
+              </div>
+
+            </div>
+          }
+        </div>
+
+      }
+    </div>
+
+  }
+
+</div>
