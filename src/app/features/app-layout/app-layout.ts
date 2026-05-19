@@ -4,7 +4,17 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  NavigationCancel,
+  NavigationEnd,
+  NavigationError,
+  NavigationStart,
+  Router,
+  RouterLink,
+  RouterOutlet,
+} from '@angular/router';
+import { filter, map, startWith } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { LoadingService } from '../../core/services/loading.service';
 import { ModalComponent } from '../../core/components/modal/modal.component';
@@ -17,7 +27,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ModalComponent],
+  imports: [RouterOutlet, RouterLink, ModalComponent],
   templateUrl: './app-layout.html',
   styleUrl: './app-layout.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +39,36 @@ export class AppLayoutComponent {
 
   readonly collapsed = signal(false);
   readonly showSignOutConfirm = signal(false);
+
+  private readonly _pendingUrl = toSignal(
+    this.router.events.pipe(
+      filter(
+        (e) =>
+          e instanceof NavigationStart ||
+          e instanceof NavigationEnd ||
+          e instanceof NavigationCancel ||
+          e instanceof NavigationError,
+      ),
+      map((e) => (e instanceof NavigationStart ? e.url : null)),
+      startWith(null),
+    ),
+    { initialValue: null as string | null },
+  );
+
+  private readonly _currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      map((e) => (e as NavigationEnd).urlAfterRedirects),
+      startWith(this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+
+  /** Returns true immediately when a nav link is clicked, before the route resolves. */
+  isTabActive(path: string): boolean {
+    const url = this._pendingUrl() ?? this._currentUrl()!;
+    return url === path || url.startsWith(path + '/');
+  }
 
   readonly navItems: NavItem[] = [
     { label: 'Overview', path: '/overview', icon: 'overview' },

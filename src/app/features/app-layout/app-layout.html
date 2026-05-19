@@ -28,7 +28,11 @@
       @for (item of navItems; track item.path) {
         <a
           [routerLink]="item.path"
-          routerLinkActive="bg-beige-100 text-grey-900 rounded-r-xl border-l-4 border-green"
+          [class.bg-beige-100]="isTabActive(item.path)"
+          [class.text-grey-900]="isTabActive(item.path)"
+          [class.rounded-r-xl]="isTabActive(item.path)"
+          [class.border-l-4]="isTabActive(item.path)"
+          [class.border-green]="isTabActive(item.path)"
           class="flex items-center gap-4 px-4 py-4 text-grey-300 hover:text-white rounded-r-xl transition-colors duration-200 group"
           [class.justify-center]="collapsed()"
           [attr.aria-label]="collapsed() ? item.label : null"
@@ -96,7 +100,11 @@
       @for (item of navItems; track item.path) {
         <a
           [routerLink]="item.path"
-          routerLinkActive="text-grey-900 border-b-4 border-green bg-beige-100 rounded-t-lg"
+          [class.text-grey-900]="isTabActive(item.path)"
+          [class.border-b-4]="isTabActive(item.path)"
+          [class.border-green]="isTabActive(item.path)"
+          [class.bg-beige-100]="isTabActive(item.path)"
+          [class.rounded-t-lg]="isTabActive(item.path)"
           class="flex flex-col items-center gap-1 px-3 py-2 text-grey-300 transition-colors duration-300 group hover:text-white"
         >
           <span
