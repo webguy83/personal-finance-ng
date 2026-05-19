@@ -48,3 +48,6 @@ Thumbs.db
 .editorconfig
 .gemini
 .gemini/*
+
+.agents
+skills-lock.json
