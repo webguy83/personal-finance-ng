@@ -1,0 +1,29 @@
+name: Reset Guest Account
+
+on:
+  schedule:
+    # Runs every day at 03:00 UTC (11pm ET / 8pm PT)
+    - cron: '0 3 * * *'
+  workflow_dispatch: # allow manual trigger from GitHub Actions UI
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Reset guest account data
+        run: node scripts/seed-guest.mjs
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
