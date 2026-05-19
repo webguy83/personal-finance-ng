@@ -147,6 +147,7 @@
                   routerLink="/transactions"
                   [queryParams]="{ category: budget.category }"
                   class="flex items-center gap-2 text-preset-4 text-grey-500 hover:text-grey-900 transition-colors"
+                  [attr.aria-label]="'See all ' + budget.category + ' transactions'"
                 >
                   See All
                   <span class="block w-2 h-2 bg-grey-500 icon-mask icon-caret-right" aria-hidden="true"></span>

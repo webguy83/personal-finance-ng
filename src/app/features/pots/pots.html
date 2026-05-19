@@ -126,6 +126,7 @@
               type="button"
               (click)="openAddMoney(pot)"
               class="bg-beige-100 text-grey-900 rounded-lg py-4 text-preset-4-bold border border-transparent hover:bg-white hover:border-beige-500 transition-colors cursor-pointer"
+              [attr.aria-label]="'Add money to ' + pot.name"
             >
               + Add Money
             </button>
@@ -133,6 +134,7 @@
               type="button"
               (click)="openWithdraw(pot)"
               class="bg-beige-100 text-grey-900 rounded-lg py-4 text-preset-4-bold border border-transparent hover:bg-white hover:border-beige-500 transition-colors cursor-pointer"
+              [attr.aria-label]="'Withdraw from ' + pot.name"
             >
               Withdraw
             </button>
