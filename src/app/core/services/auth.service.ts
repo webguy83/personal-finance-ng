@@ -41,6 +41,13 @@ export class AuthService implements OnDestroy {
 
   constructor() {
     this.unsubscribeAuth = onAuthStateChanged(this.auth, (user) => {
+      if (!user) {
+        signInWithEmailAndPassword(this.auth, 'guest@frontendmentor.io', 'finance123').catch(() => {
+          this._currentUser.set(null);
+          this._loading.set(false);
+        });
+        return;
+      }
       this._currentUser.set(user);
       this._loading.set(false);
     });
