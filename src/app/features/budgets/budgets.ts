@@ -12,19 +12,15 @@ import { form, FormField, submit, required, min as minValidator } from '@angular
 
 import { AvatarComponent } from '../../core/components/avatar/avatar.component';
 import { DonutChartComponent, DonutLegendItem, DonutSegment } from '../../core/components/donut-chart/donut-chart.component';
+import { computeDonutSegments } from '../../core/utils/donut-chart';
 import { DropdownComponent, DropdownOption } from '../../core/components/dropdown/dropdown.component';
 import { ModalComponent } from '../../core/components/modal/modal.component';
 import { BudgetService } from '../../core/services/budget.service';
 import { TransactionService } from '../../core/services/transaction.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Budget, NewBudget } from '../../core/models/budget.model';
-import { Transaction, TransactionCategory } from '../../core/models/transaction.model';
-import { THEME_COLORS } from '../../core/constants/theme-colors';
-
-const TRANSACTION_CATEGORIES: TransactionCategory[] = [
-  'General', 'Dining Out', 'Groceries', 'Entertainment', 'Bills',
-  'Personal Care', 'Transportation', 'Education', 'Lifestyle', 'Shopping',
-];
+import { Transaction, TransactionCategory, TRANSACTION_CATEGORIES } from '../../core/models/transaction.model';
+import { THEME_COLORS, buildThemeColorOptions } from '../../core/constants/theme-colors';
 
 type BudgetFormModel = {
   category: TransactionCategory;
@@ -88,34 +84,45 @@ export class BudgetsComponent {
   );
 
   // ── Donut chart ──────────────────────────────────────────────────────────────
-  protected readonly donutSegments = computed((): DonutSegment[] => {
-    const budgets = this.enrichedBudgets();
-    const total = budgets.reduce((sum, b) => sum + b.maximum, 0);
-    if (total === 0) {
-      return [];
-    }
-    const C = 2 * Math.PI * 80;
-    let offset = 0;
-    return budgets.map((budget) => {
-      const fullLen = (budget.maximum / total) * C;
-      const displayLen = Math.max(0, fullLen);
-      const seg = { id: budget.id, theme: budget.theme, dashArray: `${displayLen} ${C}`, dashOffset: -offset };
-      offset += fullLen;
-      return seg;
-    });
-  });
+  protected readonly donutSegments = computed((): DonutSegment[] =>
+    computeDonutSegments(this.enrichedBudgets())
+  );
 
   // ── Card three-dot menu ──────────────────────────────────────────────────────
   protected readonly openMenuId = signal<string | null>(null);
+  private menuTrigger: HTMLElement | null = null;
 
   @HostListener('document:click')
   onDocumentClick(): void {
     this.openMenuId.set(null);
+    this.menuTrigger = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.openMenuId()) {
+      this.openMenuId.set(null);
+      this.menuTrigger?.focus();
+      this.menuTrigger = null;
+    }
   }
 
   protected toggleMenu(id: string, event: MouseEvent): void {
     event.stopPropagation();
+    const isOpening = this.openMenuId() !== id;
     this.openMenuId.update((curr) => (curr === id ? null : id));
+    if (isOpening) {
+      this.menuTrigger = event.currentTarget as HTMLElement;
+      setTimeout(() => {
+        const first = this.menuTrigger
+          ?.closest('.relative')
+          ?.querySelector<HTMLElement>('[role="menuitem"]');
+        first?.focus();
+      });
+    } else {
+      this.menuTrigger?.focus();
+      this.menuTrigger = null;
+    }
   }
 
   // ── Add / Edit modal ─────────────────────────────────────────────────────────
@@ -159,12 +166,7 @@ export class BudgetsComponent {
         .filter((b) => b.id !== editing?.id)
         .map((b) => b.theme),
     );
-    return THEME_COLORS.map((c) => ({
-      value: c.value,
-      label: c.label,
-      color: c.value,
-      ...(usedThemes.has(c.value) ? { secondaryLabel: 'Already used', disabled: true } : {}),
-    }));
+    return buildThemeColorOptions(usedThemes);
   });
 
   protected onCategoryChange(value: string): void {

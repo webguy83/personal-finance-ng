@@ -26,7 +26,7 @@
 
       <!-- Black card -->
       <div class="bg-grey-900 rounded-xl p-6 flex flex-row items-center gap-4 sm:flex-col sm:items-start sm:justify-between sm:gap-12 sm:min-h-44">
-        <img src="/icon-recurring-bills.svg" alt="" aria-hidden="true" />
+        <img src="/icons/icon-recurring-bills.svg" alt="" aria-hidden="true" />
         <div class="flex flex-col gap-1 sm:gap-3">
           <p class="text-preset-4 text-white">Total Bills</p>
           <p class="text-preset-1 text-white">{{ totalBills() | currency:'USD':'symbol':'1.2-2' }}</p>
@@ -98,7 +98,7 @@
             [options]="sortOptions"
             [value]="sortBy()"
             (valueChange)="onSortChange($event)"
-            iconSrc="/icon-sort-mobile.svg"
+            iconSrc="/icons/icon-sort-mobile.svg"
             ariaLabel="Sort by"
           />
         </div>
@@ -154,9 +154,9 @@
                     [class.text-grey-500]="bill.status === 'upcoming'"
                   >Monthly · {{ ordinal(bill.day) }}</p>
                   @if (bill.status === 'paid') {
-                    <img src="/icon-bill-paid.svg" class="w-3 h-3" alt="Paid" />
+                    <img src="/icons/icon-bill-paid.svg" class="w-3 h-3" alt="Paid" />
                   } @else if (bill.status === 'dueSoon') {
-                    <img src="/icon-bill-due.svg" class="w-3 h-3" alt="Due soon" />
+                    <img src="/icons/icon-bill-due.svg" class="w-3 h-3" alt="Due soon" />
                   }
                 </div>
               </div>
@@ -170,9 +170,9 @@
                   [class.text-grey-500]="bill.status === 'upcoming'"
                 >Monthly · {{ ordinal(bill.day) }}</p>
                 @if (bill.status === 'paid') {
-                  <img src="/icon-bill-paid.svg" class="w-4 h-4" alt="Paid" />
+                  <img src="/icons/icon-bill-paid.svg" class="w-4 h-4" alt="Paid" />
                 } @else if (bill.status === 'dueSoon') {
-                  <img src="/icon-bill-due.svg" class="w-4 h-4" alt="Due soon" />
+                  <img src="/icons/icon-bill-due.svg" class="w-4 h-4" alt="Due soon" />
                 }
               </div>
 

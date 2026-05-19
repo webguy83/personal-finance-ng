@@ -9,7 +9,7 @@ export const routes: Routes = [
   {
     path: '',
     loadChildren: () =>
-      import('./features/app.routes').then((m) => m.appRoutes),
+      import('./features/features.routes').then((m) => m.appRoutes),
   },
   { path: '**', redirectTo: '/overview' },
 ];

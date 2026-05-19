@@ -4,12 +4,12 @@ import { RouterLink } from '@angular/router';
 import { Timestamp } from 'firebase/firestore';
 import { AvatarComponent } from '../../core/components/avatar/avatar.component';
 import { DonutChartComponent, DonutLegendItem, DonutSegment } from '../../core/components/donut-chart/donut-chart.component';
+import { computeDonutSegments } from '../../core/utils/donut-chart';
+import { BillStatus, getBillStatus, isCurrentMonth } from '../../core/utils/recurring-bill.utils';
 import { TransactionService } from '../../core/services/transaction.service';
 import { BudgetService } from '../../core/services/budget.service';
 import { PotService } from '../../core/services/pot.service';
 import { RecurringBillService } from '../../core/services/recurring-bill.service';
-
-type BillStatus = 'paid' | 'dueSoon' | 'upcoming';
 
 @Component({
   selector: 'app-overview',
@@ -60,8 +60,8 @@ export class OverviewComponent {
   }
 
   protected formatAmount(amount: number): string {
-    const abs = Math.abs(amount).toFixed(2);
-    return amount >= 0 ? `+$${abs}` : `-$${abs}`;
+    const formatted = this.currencyPipe.transform(Math.abs(amount), 'USD', 'symbol', '1.2-2') ?? '';
+    return amount >= 0 ? `+${formatted}` : `-${formatted}`;
   }
 
   // ── Budgets ─────────────────────────────────────────────
@@ -93,24 +93,9 @@ export class OverviewComponent {
     return `of ${limit} limit`;
   });
 
-  protected readonly donutSegments = computed((): DonutSegment[] => {
-    const budgets = this.enrichedBudgets();
-    const total = budgets.reduce((sum, b) => sum + b.maximum, 0);
-    if (total === 0) return [];
-    const C = 2 * Math.PI * 80;
-    let offset = 0;
-    return budgets.map(budget => {
-      const fullLen = (budget.maximum / total) * C;
-      const seg: DonutSegment = {
-        id: budget.id,
-        theme: budget.theme,
-        dashArray: `${fullLen} ${C}`,
-        dashOffset: -offset,
-      };
-      offset += fullLen;
-      return seg;
-    });
-  });
+  protected readonly donutSegments = computed((): DonutSegment[] =>
+    computeDonutSegments(this.enrichedBudgets())
+  );
 
   protected readonly budgetLegendItems = computed((): DonutLegendItem[] =>
     this.enrichedBudgets().map(b => ({
@@ -126,17 +111,11 @@ export class OverviewComponent {
   private readonly currentMonthBills = computed(() => {
     const now = new Date();
     const todayMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const msPerDay = 1000 * 60 * 60 * 24;
     return this.billService.bills()
-      .filter(b => {
-        const d = b.dueDate.toDate();
-        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-      })
+      .filter(b => isCurrentMonth(b.dueDate.toDate(), now))
       .map(b => {
         const d = b.dueDate.toDate();
-        const dueDayMs = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-        const daysUntil = Math.round((dueDayMs - todayMs) / msPerDay);
-        const status: BillStatus = daysUntil < 0 ? 'paid' : daysUntil <= 7 ? 'dueSoon' : 'upcoming';
+        const status = getBillStatus(d, todayMs);
         return { ...b, status };
       });
   });

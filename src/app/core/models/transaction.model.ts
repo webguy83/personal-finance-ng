@@ -24,3 +24,16 @@ export interface Transaction {
 }
 
 export type NewTransaction = Omit<Transaction, 'id'>;
+
+export const TRANSACTION_CATEGORIES: TransactionCategory[] = [
+  'General',
+  'Dining Out',
+  'Groceries',
+  'Entertainment',
+  'Bills',
+  'Personal Care',
+  'Transportation',
+  'Education',
+  'Lifestyle',
+  'Shopping',
+];

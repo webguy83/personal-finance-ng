@@ -6,6 +6,7 @@ This is a solution to the [Personal finance app challenge on Frontend Mentor](ht
 
 - [Frontend Mentor - Personal finance app solution](#frontend-mentor---personal-finance-app-solution)
   - [Table of contents](#table-of-contents)
+  - [Demo account](#demo-account)
   - [Overview](#overview)
     - [The challenge](#the-challenge)
     - [Screenshot](#screenshot)
@@ -19,6 +20,15 @@ This is a solution to the [Personal finance app challenge on Frontend Mentor](ht
       - [Working with the Angular MCP Server and AI Tools](#working-with-the-angular-mcp-server-and-ai-tools)
     - [Continued development](#continued-development)
   - [Author](#author)
+
+## Demo account
+
+| | |
+|---|---|
+| **Email** | `guest@frontendmentor.io` |
+| **Password** | `finance123` |
+
+>
 
 ## Overview
 
@@ -48,8 +58,8 @@ Users should be able to:
 
 ### Links
 
-- Solution URL: [Add solution URL here](https://your-solution-url.com)
-- Live Site URL: [Add live site URL here](https://your-live-site-url.com)
+- Solution URL: [Solution](https://www.frontendmentor.io/solutions/personal-finance-app-using-modern-angular-signalsfirebase-integration-LFUxL4aI5M)
+- Live Site URL: [Personal Finance App](https://personal-finance-3cabc.web.app/)
 
 ## My process
 

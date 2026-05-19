@@ -30,6 +30,7 @@ export class DropdownComponent {
   private readonly elRef = inject(ElementRef);
 
   protected readonly triggerId = `app-dropdown-trigger-${++_dropdownIdCounter}`;
+  protected readonly listboxId = `app-dropdown-listbox-${_dropdownIdCounter}`;
 
   readonly options = input.required<DropdownOption[]>();
   readonly value = input.required<string>();

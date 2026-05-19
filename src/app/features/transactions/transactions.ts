@@ -6,7 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { createPagination } from '../../core/utils/pagination';
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { form, FormField, submit, required, min as minValidator } from '@angular/forms/signals';
 import { Timestamp } from 'firebase/firestore';
 import { ActivatedRoute } from '@angular/router';
@@ -15,22 +15,9 @@ import { DropdownComponent, DropdownOption } from '../../core/components/dropdow
 import { ModalComponent } from '../../core/components/modal/modal.component';
 import { TransactionService } from '../../core/services/transaction.service';
 import { AuthService } from '../../core/services/auth.service';
-import { TransactionCategory, NewTransaction } from '../../core/models/transaction.model';
+import { TransactionCategory, NewTransaction, TRANSACTION_CATEGORIES } from '../../core/models/transaction.model';
 
 type SortOption = 'latest' | 'oldest' | 'az' | 'za' | 'highest' | 'lowest';
-
-const TRANSACTION_CATEGORIES: TransactionCategory[] = [
-  'General',
-  'Dining Out',
-  'Groceries',
-  'Entertainment',
-  'Bills',
-  'Personal Care',
-  'Transportation',
-  'Education',
-  'Lifestyle',
-  'Shopping',
-];
 
 const PAGE_SIZE = 10;
 
@@ -39,12 +26,13 @@ const PAGE_SIZE = 10;
   templateUrl: './transactions.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AvatarComponent, FormField, DropdownComponent, ModalComponent],
-  providers: [DatePipe],
+  providers: [CurrencyPipe, DatePipe],
 })
 export class TransactionsComponent {
   private readonly txService = inject(TransactionService);
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly currencyPipe = inject(CurrencyPipe);
   private readonly datePipe = inject(DatePipe);
 
   protected readonly categories = TRANSACTION_CATEGORIES;
@@ -208,8 +196,8 @@ export class TransactionsComponent {
   }
 
   protected formatAmount(amount: number): string {
-    const abs = Math.abs(amount).toFixed(2);
-    return amount >= 0 ? `+$${abs}` : `-$${abs}`;
+    const formatted = this.currencyPipe.transform(Math.abs(amount), 'USD', 'symbol', '1.2-2') ?? '';
+    return amount >= 0 ? `+${formatted}` : `-${formatted}`;
   }
 
   private categoryFromQueryParam(): TransactionCategory | 'All Transactions' {

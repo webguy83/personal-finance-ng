@@ -6,6 +6,7 @@
     (click)="toggle()"
     [attr.aria-expanded]="isOpen()"
     aria-haspopup="listbox"
+    [attr.aria-controls]="isOpen() ? listboxId : null"
     [attr.aria-label]="ariaLabel() || 'Open menu'"
     class="flex items-center justify-center w-10 h-10 cursor-pointer  focus-visible:ring-2 focus-visible:ring-grey-900 rounded-lg"
   >
@@ -23,6 +24,7 @@
     (click)="toggle()"
     [attr.aria-expanded]="isOpen()"
     aria-haspopup="listbox"
+    [attr.aria-controls]="isOpen() ? listboxId : null"
     [attr.aria-labelledby]="labelId() ? labelId() + ' ' + triggerId : null"
     class="flex items-center justify-between gap-3 border border-beige-500 rounded-lg px-4 py-3 text-preset-4 text-grey-900 bg-white cursor-pointer hover:border-grey-900  focus-visible:ring-2 focus-visible:ring-grey-900 transition-colors min-w-[114px] w-full whitespace-nowrap"
   >
@@ -44,6 +46,7 @@
 @if (isOpen()) {
   <div
     class="absolute top-[calc(100%+6px)] right-0 z-10 bg-white rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.25)] min-w-full w-max overflow-hidden py-3"
+    [id]="listboxId"
     role="listbox"
     [attr.aria-labelledby]="triggerId"
   >
@@ -69,7 +72,7 @@
           }
           <span [class.text-grey-500]="!!opt.secondaryLabel">{{ opt.label }}</span>
           @if (opt.value === value()) {
-            <img src="/icon-selected.svg" class="ml-auto shrink-0" width="14" height="14" aria-hidden="true" />
+            <img src="/icons/icon-selected.svg" class="ml-auto shrink-0" width="14" height="14" aria-hidden="true" />
           } @else if (opt.secondaryLabel) {
             <span class="ml-auto text-preset-5 text-grey-500 pl-4">{{ opt.secondaryLabel }}</span>
           }

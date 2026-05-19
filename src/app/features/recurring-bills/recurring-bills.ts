@@ -9,9 +9,9 @@ import { AuthService } from '../../core/services/auth.service';
 import { RecurringBillService } from '../../core/services/recurring-bill.service';
 import { NewRecurringBill } from '../../core/models/recurring-bill.model';
 import { createPagination } from '../../core/utils/pagination';
+import { BillStatus, getBillStatus, isCurrentMonth } from '../../core/utils/recurring-bill.utils';
 
 type SortOption = 'latest' | 'oldest' | 'az' | 'za' | 'highest' | 'lowest';
-type BillStatus = 'paid' | 'dueSoon' | 'upcoming';
 
 /** View model used by the template */
 interface DisplayBill {
@@ -72,19 +72,16 @@ export class RecurringBillsComponent {
   private readonly allBills = computed<DisplayBill[]>(() => {
     const now = new Date();
     const todayMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const msPerDay = 1000 * 60 * 60 * 24;
 
     return this.billService.bills()
       .filter((b) => {
         const d = b.dueDate.toDate();
-        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        return isCurrentMonth(d, now);
       })
       .map((b) => {
         const dueDate = b.dueDate.toDate();
         const day = dueDate.getDate();
-        const dueDayMs = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate()).getTime();
-        const daysUntil = Math.round((dueDayMs - todayMs) / msPerDay);
-        const status: BillStatus = daysUntil < 0 ? 'paid' : daysUntil <= 7 ? 'dueSoon' : 'upcoming';
+        const status = getBillStatus(dueDate, todayMs);
         return { id: b.id, name: b.name, amount: b.amount, day, status };
       });
   });

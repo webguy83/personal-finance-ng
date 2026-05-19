@@ -14,7 +14,7 @@ import { ModalComponent } from '../../core/components/modal/modal.component';
 import { PotService } from '../../core/services/pot.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Pot } from '../../core/models/pot.model';
-import { THEME_COLORS } from '../../core/constants/theme-colors';
+import { THEME_COLORS, buildThemeColorOptions } from '../../core/constants/theme-colors';
 
 type PotFormModel = {
   name: string;
@@ -42,15 +42,39 @@ export class PotsComponent {
 
   // ── Card three-dot menu ──────────────────────────────────────────────────────
   protected readonly openMenuId = signal<string | null>(null);
+  private menuTrigger: HTMLElement | null = null;
 
   @HostListener('document:click')
   onDocumentClick(): void {
     this.openMenuId.set(null);
+    this.menuTrigger = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.openMenuId()) {
+      this.openMenuId.set(null);
+      this.menuTrigger?.focus();
+      this.menuTrigger = null;
+    }
   }
 
   protected toggleMenu(id: string, event: MouseEvent): void {
     event.stopPropagation();
+    const isOpening = this.openMenuId() !== id;
     this.openMenuId.update((curr) => (curr === id ? null : id));
+    if (isOpening) {
+      this.menuTrigger = event.currentTarget as HTMLElement;
+      setTimeout(() => {
+        const first = this.menuTrigger
+          ?.closest('.relative')
+          ?.querySelector<HTMLElement>('[role="menuitem"]');
+        first?.focus();
+      });
+    } else {
+      this.menuTrigger?.focus();
+      this.menuTrigger = null;
+    }
   }
 
   // ── Add / Edit modal ─────────────────────────────────────────────────────────
@@ -81,12 +105,7 @@ export class PotsComponent {
         .filter((p) => p.id !== editing?.id)
         .map((p) => p.theme),
     );
-    return THEME_COLORS.map((c) => ({
-      value: c.value,
-      label: c.label,
-      color: c.value,
-      ...(usedThemes.has(c.value) ? { secondaryLabel: 'Already used', disabled: true } : {}),
-    }));
+    return buildThemeColorOptions(usedThemes);
   });
 
   protected readonly canAddPot = computed(() =>
