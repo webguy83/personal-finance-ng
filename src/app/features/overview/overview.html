@@ -4,6 +4,13 @@
   <!-- ── Header ──────────────────────────────────────────── -->
   <h1 class="text-preset-1 text-grey-900">Overview</h1>
 
+  <!-- ── Loading ─────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="bg-white rounded-xl p-8 flex justify-center items-center min-h-48">
+      <p class="text-preset-4 text-grey-500">Loading overview…</p>
+    </div>
+  } @else {
+
   <!-- ── Summary cards ───────────────────────────────────── -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
 
@@ -172,4 +179,7 @@
     </div>
 
   </div>
+
+  } <!-- end @else (loading) -->
+
 </div>

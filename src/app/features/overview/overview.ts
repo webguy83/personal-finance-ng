@@ -26,6 +26,13 @@ export class OverviewComponent {
   private readonly currencyPipe = inject(CurrencyPipe);
   private readonly datePipe = inject(DatePipe);
 
+  protected readonly loading = computed(() =>
+    this.txService.loading() ||
+    this.budgetService.loading() ||
+    this.potService.loading() ||
+    this.billService.loading()
+  );
+
   // ── Summary cards ────────────────────────────────────────
   protected readonly currentBalance = computed(() =>
     this.txService.transactions().reduce((sum, t) => sum + t.amount, 0)
