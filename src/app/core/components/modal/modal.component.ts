@@ -8,9 +8,6 @@ const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select
   styleUrl: './modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    role: 'dialog',
-    'aria-modal': 'true',
-    'aria-labelledby': 'modal-heading',
     'animate.enter': 'modal-in',
     'animate.leave': 'modal-out',
     '(mousedown)': 'onBackdropMousedown($event)',

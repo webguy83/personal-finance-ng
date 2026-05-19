@@ -83,6 +83,7 @@
                   <div
                     class="absolute right-0 top-8 bg-white rounded-xl shadow-lg border border-grey-100 py-3 z-20 min-w-[160px]"
                     (click)="$event.stopPropagation()"
+                    (keydown.escape)="onEscapeKey()"
                     role="menu"
                   >
                     <button
