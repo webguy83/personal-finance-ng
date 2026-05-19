@@ -208,13 +208,14 @@
 
       <!-- Category -->
       <div class="flex flex-col gap-1">
-        <label class="text-preset-5-bold text-grey-500">Budget Category</label>
+        <label id="budget-category-label" class="text-preset-5-bold text-grey-500">Budget Category</label>
         <div class="relative">
           <app-dropdown
             class="!block w-full"
             [options]="modalCategoryOptions()"
             [value]="formCategory()"
             (valueChange)="onCategoryChange($event)"
+            [labelId]="'budget-category-label'"
           />
         </div>
       </div>
@@ -247,11 +248,12 @@
 
       <!-- Theme -->
       <div class="flex flex-col gap-1">
-        <label class="text-preset-5-bold text-grey-500">Theme</label>
+        <label id="budget-theme-label" class="text-preset-5-bold text-grey-500">Theme</label>
         <app-dropdown
           [options]="themeColorOptions()"
           [value]="formTheme()"
           (valueChange)="onThemeChange($event)"
+          [labelId]="'budget-theme-label'"
         />
       </div>
 

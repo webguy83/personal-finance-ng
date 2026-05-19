@@ -216,11 +216,12 @@
 
       <!-- Theme -->
       <div class="flex flex-col gap-1">
-        <label class="text-preset-5-bold text-grey-500">Theme</label>
+        <label id="pot-theme-label" class="text-preset-5-bold text-grey-500">Theme</label>
         <app-dropdown
           [options]="themeColorOptions()"
           [value]="formTheme()"
           (valueChange)="onThemeChange($event)"
+          [labelId]="'pot-theme-label'"
         />
       </div>
 
