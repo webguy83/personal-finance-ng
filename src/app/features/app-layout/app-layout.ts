@@ -16,7 +16,7 @@ import {
 } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
-import { LoadingService } from '../../core/services/loading.service';
+import { LoadingSpinnerComponent } from '../../core/components/loading-spinner/loading-spinner.component';
 import { ModalComponent } from '../../core/components/modal/modal.component';
 
 interface NavItem {
@@ -27,7 +27,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, RouterLink, ModalComponent],
+  imports: [RouterOutlet, RouterLink, LoadingSpinnerComponent, ModalComponent],
   templateUrl: './app-layout.html',
   styleUrl: './app-layout.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,7 +35,6 @@ interface NavItem {
 export class AppLayoutComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  readonly loadingService = inject(LoadingService);
 
   readonly collapsed = signal(false);
   readonly showSignOutConfirm = signal(false);

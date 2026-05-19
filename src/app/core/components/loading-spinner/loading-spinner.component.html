@@ -1,0 +1,12 @@
+@if (loadingService.isLoading()) {
+  <div
+    class="absolute inset-0 z-40 flex items-center justify-center bg-beige-100/80 backdrop-blur-sm"
+    aria-live="polite"
+    aria-label="Loading"
+  >
+    <div class="flex flex-col items-center gap-4">
+      <div class="w-12 h-12 rounded-full border-4 border-grey-100 border-t-green animate-spin"></div>
+      <p class="text-preset-5 text-grey-500">Loading…</p>
+    </div>
+  </div>
+}

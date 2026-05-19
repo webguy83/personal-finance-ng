@@ -59,10 +59,10 @@ a.bg-beige-100:hover {
   mask-position: center;
 }
 
-.icon-search       { mask-image: url('/icons/icon-search.svg'); }
-.icon-caret-down   { mask-image: url('/icons/icon-caret-down.svg'); }
-.icon-caret-left   { mask-image: url('/icons/icon-caret-left.svg'); }
-.icon-caret-right  { mask-image: url('/icons/icon-caret-right.svg'); }
+.icon-search       { mask-image: url('/icon-search.svg'); }
+.icon-caret-down   { mask-image: url('/icon-caret-down.svg'); }
+.icon-caret-left   { mask-image: url('/icon-caret-left.svg'); }
+.icon-caret-right  { mask-image: url('/icon-caret-right.svg'); }
 
 @layer base {
   body {
