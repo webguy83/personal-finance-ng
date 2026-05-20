@@ -117,7 +117,7 @@
             </div>
             <div class="flex items-center justify-between">
               <p class="text-preset-5-bold text-grey-500">{{ progressPct(pot) | number:'1.0-2' }}%</p>
-              <p class="text-preset-5 text-grey-500">Target of {{ pot.target | currency:'USD':'symbol':'1.0-2' }}</p>
+              <p class="text-preset-5 text-grey-500">Target of {{ pot.target | currency:'USD':'symbol':'1.2-2' }}</p>
             </div>
           </div>
 
@@ -321,7 +321,7 @@
         >
           {{ newProgressPct() | number:'1.0-2' }}%
         </p>
-        <p class="text-preset-5 text-grey-500">Target of {{ adjustingPot()!.target | currency:'USD':'symbol':'1.0-2' }}</p>
+        <p class="text-preset-5 text-grey-500">Target of {{ adjustingPot()!.target | currency:'USD':'symbol':'1.2-2' }}</p>
       </div>
     </div>
 
