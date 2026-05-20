@@ -1,12 +1,10 @@
 import { Routes } from '@angular/router';
 import { AppLayoutComponent } from './app-layout/app-layout';
-import { authGuard } from '../core/guards/auth.guard';
 
 export const appRoutes: Routes = [
   {
     path: '',
     component: AppLayoutComponent,
-    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'overview', pathMatch: 'full' },
       {
