@@ -1,13 +1,16 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { createPagination } from '../../core/utils/pagination';
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { form, FormField, submit, required, min as minValidator } from '@angular/forms/signals';
+import { form, FormField, submit, required, min as minValidator, validate, requiredError } from '@angular/forms/signals';
 import { Timestamp } from 'firebase/firestore';
 import { ActivatedRoute } from '@angular/router';
 import { AvatarComponent } from '../../core/components/avatar/avatar.component';
@@ -108,9 +111,25 @@ export class TransactionsComponent {
     date: this.todayString(),
   });
 
+  private readonly dateInputRef = viewChild<ElementRef>('dateRef');
+
+  constructor() {
+    afterRenderEffect(() => {
+      const el = this.dateInputRef()?.nativeElement;
+      if (el) el.setAttribute('max', this.today);
+    });
+  }
+
   protected readonly addForm = form(this._addModel, (s) => {
     required(s.name, { message: 'Transaction name is required' });
     required(s.date, { message: 'Date is required' });
+    validate(s.date, (ctx) => {
+      const val = ctx.value() as string;
+      if (val && val > this.today) {
+        return requiredError({ message: 'Date cannot be in the future' });
+      }
+      return undefined;
+    });
     minValidator(s.amount, 0.01, { message: 'Amount must be greater than $0.00' });
   });
 
@@ -205,6 +224,8 @@ export class TransactionsComponent {
     const isValid = param !== null && (TRANSACTION_CATEGORIES as string[]).includes(param);
     return isValid ? (param as TransactionCategory) : 'All Transactions';
   }
+
+  protected readonly today = this.todayString();
 
   private todayString(): string {
     return this.datePipe.transform(new Date(), 'yyyy-MM-dd') ?? '';
